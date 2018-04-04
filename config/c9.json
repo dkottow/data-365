@@ -1,0 +1,24 @@
+{
+    "auth": false,
+
+    "logs"  : {
+        "transports": [
+            {
+                "type": "console",
+                "level": "debug",
+                "colorize": true
+            }
+        ]
+    },
+    
+     "sql": {
+        "engine"    : "sqlite",
+        "pageRows"  : 1000
+    },
+
+     "url": {
+        "host"    : "api-donkeylift-dkottow.c9.io",
+        "protocol"  : "https"
+    }
+    
+}

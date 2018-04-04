@@ -1,0 +1,65 @@
+<script type="text/template" id="table-template">
+	<div>
+		<div class="panel panel-heading">
+			<h3 class="panel-title">
+				<span>Table</span> {{ name }} &nbsp;
+				<button type="button" class="edit-table btn btn-default">
+					<i class="fa fa-pencil"></i>
+				</button>
+			</h3>
+			<br/>
+			<ul class="nav nav-tabs">
+				<li role="presentation" class="active"><a href="#fields" data-toggle="tab">Fields</a></li>
+				<li role="presentation"><a href="#relations" data-toggle="tab">Relations</a></li>
+				<li role="presentation"><a href="#alias" data-toggle="tab">Row Alias</a></li>
+			</ul>
+		</div>
+		<div class="tab-content">
+			<div role="tabpanel" class="panel tab-pane active" id="fields">
+				<table class="table tab-table sortable-table">
+					<thead>
+					<tr>
+						<th></th>
+						<th></th>
+						<th>Name</th>
+						<th>Type</th>
+						<th>Disabled</th>
+					</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+				<button type="button" id="add-field" class="btn btn-default">Add field</button>
+			</div>
+			<div role="tabpanel" class="panel tab-pane" id="relations">
+				<table class="table tab-table">
+					<thead>
+					<tr>
+						<th></th>
+						<th>Parent Table</th>
+						<th>Foreign Key</th>
+					</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+				<button type="button" id="add-relation" class="btn btn-default">Add reference</button>
+			</div>
+
+			<div role="tabpanel" class="panel tab-pane" id="alias">
+				<table class="table tab-table">
+					<thead>
+					<tr>
+						<th></th>
+						<th>Alias Table</th>
+						<th>Field</th>
+					</tr>
+					</thead>
+					<tbody></tbody>
+				</table>
+				<button type="button" id="add-alias" class="btn btn-default">Add field</button>
+			</div>
+
+		</div><!-- tabcontent -->
+
+	</div>
+</script>
+

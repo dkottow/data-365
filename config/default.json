@@ -1,0 +1,74 @@
+{
+    "version": "1.0.0",
+
+    "auth"  : false,
+
+	"ip"    : "localhost",
+	"port"  : 3000, 
+
+    "tempDir"  : "tmp",
+
+    "apiRoute" : "/",
+
+    "apiServer" : "", //same as www server
+/*    
+    "sql"   : {
+        "pageRows"  : 1000,
+        "initRetryInterval": 100,
+        "engine"    : "sqlite",
+        "dataDir"   : "data",
+        "connection": {
+            "server": "localhost\\HOLEBASE_SI",
+            "user": "dkottow",
+            "domain": "GOLDER", //AD user domain
+            "password": null
+        },
+    },
+*/
+
+    "sql": {
+        "pageRows"  : 1000,
+        "initRetryInterval": 100,
+        "engine"    : "mssql",
+        "connection": {
+            "server": "localhost\\HOLEBASE_SI",
+            "user"  : "dkottow",
+            "password": null, //supply me through env var DL_MSSQL_PASSWORD
+            "domain": "GOLDER", //AD user domain
+            "options": {
+                "encrypt": false // Use this if you're on Windows Azure
+            }            
+        },
+
+        "elasticPool": "" //leave empty if no pool
+    },
+    
+    "url"   : {
+        "host"  : "localhost:3000",
+        "protocol"  : "http",
+    },
+
+    "logs"  : {
+        "transports": [
+            {
+                "type": "console",
+                "level": "debug",
+                "colorize": true
+            },
+            {
+                "type": "file",
+                "filename": "logs/donkey-error-log-json",
+                "level": "warn",
+                "timestamp": true,
+                "tailable": true,
+                "maxFiles": 10,
+                "maxsize": 1000000
+            }
+        ]
+    },
+
+    "http": {
+        "cors": false
+    }
+
+}

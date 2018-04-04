@@ -1,0 +1,90 @@
+<html>
+<head>
+	<style>
+		div { margin: 1em };
+	</style>
+<!-- inject:google_analytics:html -->
+<!-- endinject -->
+</head>
+<body>
+  <button id="btn-login">Login as demo</button>	
+  <button id="btn-sandwiches" disabled="true" >Get Sandwiches</button>	
+  <button id="btn-customers-orders" disabled="true" >Get Customers' Orders</button>	
+  <div id="data"></div>
+</body>
+
+<script src='//code.jquery.com/jquery-3.1.0.min.js' type='text/javascript'></script>
+<script src="https://cdn.rawgit.com/google/code-prettify/master/loader/run_prettify.js"></script>
+<script src='swagger-client.js' type='text/javascript'></script>
+<script type="text/javascript">
+	/* global $, SwaggerClient, PR */
+
+	var HOST="$DONKEYLIFT_API";
+
+	$('#btn-login').click(function() {
+
+		$.post( HOST + "/public/login", { 
+			email: "demo@donkeylift.com", 
+			password: "demo" 
+
+		}, function(data) {
+			//console.log(data);
+
+			var auth = new SwaggerClient.ApiKeyAuthorization(
+				'Authorization',
+				'Bearer ' + data.id_token,
+				'header'
+			);
+
+  			window.client = new SwaggerClient({
+		    	url: HOST + "/public/swagger.json",
+				authorizations: [ auth ],
+	    		success: function() {
+					$('button').prop('disabled', false);
+					console.log('swagger client init ok.');
+    			}
+			});
+
+		});
+	});
+
+	$('#btn-sandwiches').click(function() {
+
+    	window.client.table.getRows({
+			account: 'demo', 
+			database: 'sandwiches', 
+			table: 'sandwiches', 
+			$orderby: 'name',
+			$top: 20
+
+		}, function(data) {
+        	document.getElementById("data").innerHTML
+			= '<pre class="prettyprint">'
+			+ JSON.stringify(data.obj, null, 4);
+			+ '</pre>'
+			PR.prettyPrint();
+    	});
+	});
+
+	$('#btn-customers-orders').click(function() {
+
+    	window.client.table.getObjs({
+			account: 'demo', 
+			database: 'sandwiches', 
+			table: 'customers', 
+			$select: 'id, name, orders.id, orders.order_date, orders.total_amount, sandwiches.name, order_items.unit_price, order_items.quantity',
+			$filter: "orders.order_date ge '2015-01-01'",
+			$top: 50
+
+		}, function(data) {
+        	document.getElementById("data").innerHTML
+			= '<pre class="prettyprint">'
+			+ JSON.stringify(data.obj, null, 4);
+			+ '</pre>'
+			PR.prettyPrint();
+    	});
+	});
+
+</script>
+</html>
+
