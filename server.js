@@ -14,10 +14,6 @@
    limitations under the License.
 */
 
-
-var url = require('url');
-var path = require('path');
-
 require('dotenv').config(); 
 var config = require('config');
 
@@ -35,7 +31,7 @@ app.init({ auth: config.auth }, function(err) {
 
 	app.listen(config.port, config.ip, function() {
 		log.info({ip: config.ip, port: config.port}, "app listen() - listening.");
-        log.info({ mem: funcs.memInfo() }, 'memory listening');
+        log.info({ mem: funcs.memInfo() }, 'memory after init');
 		//console.log("Started server on " + config.ip + ":" + config.port);
 	});
 });

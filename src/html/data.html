@@ -54,8 +54,21 @@
 
 	<script type="text/javascript"> 
 			$(function() { 
-				Donkeylift.app = new Donkeylift.AppData(); 
-				Donkeylift.app.start(function() { console.log('done.'); } );
+
+				var params = {
+					user: 'dkottow@golder.com',
+					server: '/api'
+				};
+
+				Donkeylift.app = new Donkeylift.AppData(params); 
+
+				var db = Donkeylift.util.getParameterByName('d365_database');
+				if (db && db.indexOf('$') > 0) {
+					params.account = db.split('$')[0];
+					params.database = db.split('$')[1];
+				}
+
+				Donkeylift.app.start(params);
 			});
 
 	</script>

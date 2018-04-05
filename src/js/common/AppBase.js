@@ -45,8 +45,20 @@ var Donkeylift = {
 		  return str.replace(/[^\u0000-\u007e]/g, function(c) {
 		    return diacriticsMap[c] || c;
 		  });
-		}
-	}
+		},
+
+    //stackoverflow - https://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
+    //dk slightly modified to find "query parameter" in hash of url
+    getParameterByName: function(name, url) {
+      if (!url) url = window.location.href;
+      name = name.replace(/[\[\]]/g, "\\$&");
+      var regex = new RegExp("[?&#]" + name + "(=([^&#]*)|&|#|$)"),
+          results = regex.exec(url);
+      if (!results) return null;
+      if (!results[2]) return '';
+      return decodeURIComponent(results[2].replace(/\+/g, " "));
+    }
+  }
 	
 };
 
@@ -76,43 +88,19 @@ function AppBase(params) {
 AppBase.prototype.start = function(params, cbAfter) {
 	var me = this;
 
-  if (params.account && params.database) {
-    //load account & database straight away
-    me.setAccount({
-      user: params.user,
-      account: params.account,
-      id_token: params.id_token
-    }, function() {
+  me.setAccount({
+    user: params.user,
+    account: params.account
+  }, function() {
+    if (params.database) {
       me.setSchema(params.database, cbAfter);
-    });
-    return;
-  }
-
-  //else pick up site config
-  this.getSiteConfig(params.site, function(err, config) {
-
-    if (err) {
-      console.log(err);
-      alert(err);
-      return;
+    } else {
+      me.listSchemas(params.user, cbAfter);    
     }
-
-    me.setAccount({
-      user: params.user,
-      account: config.account,
-      id_token: params.id_token
-
-    }, function() {
-      if (config.database != '_d365Master') {
-        me.setSchema(config.database, cbAfter);
-
-      } else {
-        me.listSchemas(params.user, cbAfter);
-      }
-    });      
   });
-  
+
 }
+
 
 AppBase.prototype.masterUrl = function() {
   //TODO use fixed URL such as /d365.master which is resolved by api to the right master db. 

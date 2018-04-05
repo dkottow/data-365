@@ -8,7 +8,7 @@
 
     "tempDir"  : "tmp",
 
-    "apiRoute" : "/",
+    "apiRoute" : "/api",
 
     "apiServer" : "", //same as www server
 /*    
@@ -54,15 +54,6 @@
                 "type": "console",
                 "level": "debug",
                 "colorize": true
-            },
-            {
-                "type": "file",
-                "filename": "logs/donkey-error-log-json",
-                "level": "warn",
-                "timestamp": true,
-                "tailable": true,
-                "maxFiles": 10,
-                "maxsize": 1000000
             }
         ]
     },
