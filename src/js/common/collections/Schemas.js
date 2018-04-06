@@ -12,12 +12,27 @@ Donkeylift.Schemas = Backbone.Collection.extend({
 
 });
 
-Donkeylift.Schemas.Create = function(rows) {
-    var schemas = _.map(rows, function(row) {
-        return {
-            account: row.Account,
-            name: row.Database
-        };
+Donkeylift.Schemas.Create = function(rows, opts) {
+    opts = opts || {};
+
+    var schemas = {};
+    _.each(rows, function(row) {
+        schemas[row.Account + row.Database] = { account: row.Account, name: row.Database };
     });
+    schemas = _.values(schemas);
+
+    _.each(schemas, function(schema) {
+        schema.isAdmin = !! _.find(rows, function(row) { 
+            return row.Account == schema.account 
+                && row.Database == schema.name 
+                && row.UserPrincipalName == opts.user; 
+        });
+        schema.dbOwners = _.pluck(_.filter(rows, function(row) {
+            return row.Account == schema.account 
+                && row.Database == schema.name 
+                && row.Scope == "Database";
+        }), "UserPrincipalName");
+    });
+
     return new Donkeylift.Schemas(schemas);
 }

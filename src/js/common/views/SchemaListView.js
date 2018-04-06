@@ -29,18 +29,24 @@ Donkeylift.SchemaListView = Backbone.View.extend({
 			return schema.get('account');
 		});
 		_.each(accounts, function(schemas, account) {
-			$('#selectDatabase').append(
-				$('<optgroup></optgroup>')
-					.attr('label', account)
-			);
-			_.each(schemas, function(schema) {
-				$('#selectDatabase optgroup').last().append(
-					$('<option></option>')
-						.attr('value', schema.fullName())
-						.text(schema.get('name'))
+			var ownedSchemas = _.filter(schemas, function(schema) {
+				return schema.get('isAdmin');
+			});
+
+			if (ownedSchemas.length > 0) {
+				$('#selectDatabase').append(
+					$('<optgroup></optgroup>')
+						.attr('label', account)
 				);
-				console.log(schema.fullName());
-			});	
+				_.each(ownedSchemas, function(schema) {
+					$('#selectDatabase optgroup').last().append(
+						$('<option></option>')
+							.attr('value', schema.fullName())
+							.text(schema.get('name'))
+					);
+					console.log(schema.fullName());
+				});	
+			}
 		});
 		$('#selectDatabase').selectpicker('refresh');
 	},

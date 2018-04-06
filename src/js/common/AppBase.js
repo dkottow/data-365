@@ -228,7 +228,9 @@ AppBase.prototype.listSchemas = function(userPrincipalName, cbAfter) {
   console.log('listSchemas...');
   var me = this;
 
-  var query = "$filter=UserPrincipalName eq '" + userPrincipalName + "'";
+  var query = "";
+  //query += "&$filter=UserPrincipalName eq '" + userPrincipalName + "'";
+
   var url = this.masterUrl() + '/_d365AdminDatabases.view' + '?' + query;
   Donkeylift.ajax(url, {
 
@@ -236,7 +238,7 @@ AppBase.prototype.listSchemas = function(userPrincipalName, cbAfter) {
     var response = result.response;
     console.log(response);
 
-    me.schemas = Donkeylift.Schemas.Create(response.rows);
+    me.schemas = Donkeylift.Schemas.Create(response.rows, { user: userPrincipalName });
 		me.schemaListView = new Donkeylift.SchemaListView({
 			collection: me.schemas
 		});
