@@ -102,6 +102,12 @@ Donkeylift.DataTableView = Backbone.View.extend({
 
 			if (field.get('type') == Donkeylift.Field.TYPES.date) {
 				edField.type = 'datetime';
+				edField.data = function(data, type, set) {
+					if (type === 'set') {
+						data[edField.name] = set;
+					}
+					return data[edField.name].substr(0,10);
+				}
 
 			} else if (field.getProp('width') > 60) {
 				edField.type = 'textarea';

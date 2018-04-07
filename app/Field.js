@@ -107,7 +107,7 @@ Field.create = function(fieldDef) {
 Field.ROW_ALIAS = 'ref';
 
 Field.parseDateUTC = function(str) {
-	if (str.match(/z$/)) return new Date(str);
+	if (str.match(/[zZ]$/)) return new Date(str);
 	else return new Date(str + 'Z');
 }
 
@@ -217,8 +217,7 @@ FieldDate.prototype = new Field;
 FieldDate.prototype.constructor = FieldDate;
 FieldDate.prototype.parse = function(val) { 
 	if (val == null) return null;
-	var d = Field.parseDateUTC(val);
-	return d.toISOString().substring(0, 10);
+	return Field.parseDateUTC(val).toISOString().substring(0, 10);
 }
 
 
@@ -228,13 +227,10 @@ var FieldTimestamp = function(attrs) {
 }
 FieldTimestamp.prototype = new Field;	
 FieldTimestamp.prototype.constructor = FieldTimestamp;
-FieldTimestamp.prototype.parse = function(val) { return val == null ? null : new Date(val).toISOString(); }
-FieldDate.prototype.parse = function(val) { 
+FieldTimestamp.prototype.parse = function(val) { 
 	if (val == null) return null;
-	var d = Field.parseDateUTC(val);
-	return Field.dateToString(d);
+	return Field.parseDateUTC(val).toISOString();
 }
-
 
 var FieldFloat = function(attrs) {
 	log.trace({attrs: attrs}, "new FieldFloat()");

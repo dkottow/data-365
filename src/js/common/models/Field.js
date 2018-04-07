@@ -125,15 +125,15 @@ Donkeylift.Field = Backbone.Model.extend({
 
 		} else if(t == Donkeylift.Field.TYPES.date) {
 			//return new Date(val);
-			result = new Date(val);
+			result = new Date(val.substr(0,4), val.substr(5,2) -1, val.substr(8,2));
 			resultError = isNaN(Date.parse(val)); 
-			if ( ! resultError) result = result.toISOString().substr(0,10);
+			//if ( ! resultError) result = result.toISOString().substr(0,10);
 
 		} else if (t == Donkeylift.Field.TYPES.timestamp) {
 			//return new Date(val);
 			result = new Date(val);
 			resultError = isNaN(Date.parse(val)); 
-			if ( ! resultError) result = result.toISOString();
+			//if ( ! resultError) result = result.toISOString();
 
 		} else if (t == Donkeylift.Field.TYPES.float) {
 			result = parseFloat(val);
@@ -163,9 +163,14 @@ Donkeylift.Field = Backbone.Model.extend({
 		var t = this.typeName();
 		if (_.isNumber(val) && this.getProp('scale')) {
 			return val.toFixed(this.getProp('scale'));
-		} else if (t == 'date' || t == 'timestamp') {
+		} else if (t == 'date') {
 			//JSON - Date ISO string
-			return this.parse(val);
+			return this.parse(val).toISOString().substr(0,10);
+			//return this.parse(val).toLocaleDateString(navigator.language);
+		} else if (t == 'timestamp') {
+			//JSON - Date ISO string
+			return this.parse(val).toISOString();
+			//return this.parse(val).toLocaleString(navigator.language);
 		} else if (t == 'text') {
 			return _.escape(String(val));
 		} else {

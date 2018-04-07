@@ -105,17 +105,17 @@ var rewriteError = function(level, msg, obj) {
 
 var rewriteConfig = function(level, msg, obj) {
 	if (obj && obj.config) {
-		if (obj.config.password) {
-			var config = _.omit(obj.config, 'password');
+		var config = JSON.parse(JSON.stringify(obj.config));
+		if (config.password) {
+			config.password = config.password.substr(0, 3) + "...";
+		}
+			
+		if (config.sql && config.sql.connection && config.sql.connection.password) {
+			config.sql.connection.password = config.sql.connection.password.substr(0, 3) + "...";
 		}
 
-		if (obj.config.sql && obj.config.sql.connection) {
-			var config = _.omit(obj.config, 'sql');
-			config.sql = _.clone(obj.config.sql);
-			config.sql.connection = _.omit(obj.config.sql.connection, 'password');
-		}
-
-		return _.extend(obj, { config: config });
+		obj.config = config;
+		//return _.extend(obj, { config: config });
 	}
 	return obj;
 }
