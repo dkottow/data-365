@@ -16,4 +16,8 @@ Donkeylift.Database = Donkeylift.Schema.extend({
 		response.tables = new Donkeylift.Tables(tables);
 		return response;
 	},
+
+	localizeDatetime: function() {
+		return this.getProp('localize_datetime');		
+	}
 });		

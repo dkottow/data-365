@@ -14,24 +14,20 @@ Donkeylift.PreferencesView = Backbone.View.extend({
 
 	render: function() {
 		console.log("PreferencesView.render ");
-        var tablePrefs = this.model.getPreferences('table');
-        $('#modalInputSkipRowCounts').prop('checked', tablePrefs.skipRowCounts);
-        $('#modalInputShowRowAlias').prop('checked', tablePrefs.resolveRefs);
+        $('#modalInputSkipRowCounts').prop('checked', this.model.getPref('skip_row_counts'));
+        $('#modalInputShowRowAlias').prop('checked', this.model.getPref('resolve_refs'));
 		$('#modalEditPrefs').modal();
 		return this;
 	},
 
 	evPreferencesApplyClick: function() {
-        var tablePrefs = this.model.getPreferences('table');
-        tablePrefs.skipRowCounts = $('#modalInputSkipRowCounts').is(':checked');
-        tablePrefs.resolveRefs = $('#modalInputShowRowAlias').is(':checked');
-        Donkeylift.app.table.setPreferences(tablePrefs);
-        Donkeylift.app.resetTable();
+        this.model.setPref('skip_row_counts', $('#modalInputSkipRowCounts').is(':checked'));
+        this.model.setPref('resolve_refs', $('#modalInputShowRowAlias').is(':checked'));
+		this.model.apply();
 	},
 
 	evPreferencesSaveClick: function() {
-		var table = this.model.get('table').get('name');
-		Donkeylift.app.schema.get('props').update({ table: table });
+		this.model.update();
 	}
 
 });

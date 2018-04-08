@@ -7,12 +7,16 @@ function escapeStr(str) {
 Donkeylift.Field = Backbone.Model.extend({
 	initialize: function(field) {
 		this.set('disabled', field.disabled == true);		
-		this.set('resolveRefs', true); //auto join row alias for all foreign keys
+	},
+
+	resolveRefs: function() { 
+		//auto join row alias for fk values, default true
+		return ! (this.getProp('resolve_refs') === false)
 	},
 
 	vname: function() {
 
-		if (this.get('resolveRefs') && this.get('fk') == 1) {
+		if (this.resolveRefs() && this.get('fk') == 1) {
 			if (this.get('name').match(/id$/)) { 
 				return this.get('name').replace(/id$/, "ref");
 			} else {
@@ -164,13 +168,19 @@ Donkeylift.Field = Backbone.Model.extend({
 		if (_.isNumber(val) && this.getProp('scale')) {
 			return val.toFixed(this.getProp('scale'));
 		} else if (t == 'date') {
-			//JSON - Date ISO string
-			return this.parse(val).toISOString().substr(0,10);
-			//return this.parse(val).toLocaleDateString(navigator.language);
+			if (Donkeylift.app.schema.localizeDatetime()) {
+				return this.parse(val).toLocaleDateString(navigator.language);
+			} else {
+				//JSON - Date ISO string
+				return this.parse(val).toISOString().substr(0,10);
+			}
 		} else if (t == 'timestamp') {
-			//JSON - Date ISO string
-			return this.parse(val).toISOString();
-			//return this.parse(val).toLocaleString(navigator.language);
+			if (Donkeylift.app.schema.localizeDatetime()) {
+				return this.parse(val).toLocaleString(navigator.language);
+			} else {
+				//JSON - Date ISO string
+				return this.parse(val).toISOString();
+			}
 		} else if (t == 'text') {
 			return _.escape(String(val));
 		} else {

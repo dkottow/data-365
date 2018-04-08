@@ -137,6 +137,7 @@ Donkeylift.MenuDataView = Backbone.View.extend({
 
 	getPreferencesView: function() {
 		var prefs = new Donkeylift.Preferences({
+			schema: Donkeylift.app.schema,
 			table: Donkeylift.app.table
 		});
 		if ( ! this.preferencesView) {

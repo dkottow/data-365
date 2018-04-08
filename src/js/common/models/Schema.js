@@ -38,6 +38,14 @@ Donkeylift.Schema = Backbone.Model.extend({
 	},
 */
 
+	getProp: function(name) {
+		return Donkeylift.app.getProp(name);
+	},
+
+	setProp: function(name, value) {
+		Donkeylift.app.setProp(name, value);
+	},
+
 	parse : function(response) {
 		console.log("Schema.parse " + response);
 		response = this.parseTables(response);

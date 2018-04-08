@@ -9,7 +9,6 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 
 	initialize: function(table) {
 		Donkeylift.Table.prototype.initialize.apply(this, arguments);
-		this.set('skipRowCounts', false); //if true nocounts=1 on api calls.
 	},
 
 	createView: function(options) {
@@ -32,12 +31,16 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 		//return decodeURI(this.lastFilterUrl).replace(/\t/g, '%09');
 	},
 
+	resolveRefs: function() {
+		var fk = this.get('fields').find(function(field) { return field.get('fk') == 1 });
+		return fk != undefined && fk.resolveRefs();
+	},
+
 	sanitizeEditorData: function(req) {
 		var me = this;
 
 		try {
-			var resolveRefs = this.get('fields').at(0).get('resolveRefs');
-			var parseOpts = { validate: true, resolveRefs: resolveRefs };
+			var parseOpts = { validate: true, resolveRefs: this.resolveRefs() };
 			var rows = [];
 			var method;
 			switch(req.action) {
@@ -150,7 +153,7 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 				'$orderby': orderClauses.join(','),
 				'$skip': query.start,
 				'$top': query.length,
-				'counts': me.get('skipRowCounts') ? 0 : 1
+				'counts': me.skipRowCounts() ? 0 : 1
 			}
 
 			if (query.search.value.length == 0) {
@@ -206,7 +209,7 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 					recordsFiltered: response.count,
 				};
 
-				if (me.get('skipRowCounts')) {
+				if (me.skipRowCounts()) {
 					//unknown number of rows.. 
 					//if returned data less than queried data length, stop. 
 					//otherwise make sure we get a next page.
@@ -403,28 +406,8 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 		});
 	},
 	
-	getPreferences: function() {
-		return {
-			skipRowCounts : this.get('skipRowCounts'),
-			resolveRefs : this.get('fields').at(0).get('resolveRefs')
-		}
-	},
-
-	setPreferences: function(prefs) {
-		_.each(prefs, function(value, name) {
-			switch(name) {
-				case 'skipRowCounts':
-					this.set('skipRowCounts', value);
-					break;
-				case 'resolveRefs':
-					this.get('fields').each(function(field) {
-						field.set('resolveRefs', value);	
-					});
-					break;
-				default:
-					console.log("unknown preference '" + name + "´");
-			}
-		}, this);
+	skipRowCounts: function() {
+		return this.getProp('skip_row_counts') === true;
 	},
 
 });
