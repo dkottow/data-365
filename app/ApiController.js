@@ -95,7 +95,7 @@ Controller.prototype.initRoutes = function(options) {
 			} else {
 				//for testing, we supply user on query string ?user=dkottow@golder.com
 				log.error('Authorization token missing');
-				sendError(req, res, new Error("Authorization token missing"), 401);
+				me.sendError(req, res, new Error("Authorization token missing"), 401);
 				return;
 			}
 
@@ -206,11 +206,13 @@ Controller.prototype.listAccounts = function(req, res) {
 			account.url = '/' + account.name;
 		});
 	
+		result.login = me.getLoginInfo(req);
+
 		res.send(result);
 		log.info({req: req}, '...Controller.listAccounts()');
 
 	}).catch(err => {
-		sendError(req, res, err);
+		me.sendError(req, res, err);
 		return;
 	});
 }
@@ -222,15 +224,18 @@ Controller.prototype.putAccount = function(req, res) {
 
 		me.accountManager.create(req.params[0], function(err, result) {
 			if (err) {
-				sendError(req, res, err, 400);
+				me.sendError(req, res, err, 400);
 				return;
 			}
+
+			result.login = me.getLoginInfo(req);
+
 			log.trace(result);
 			res.send(result); 
 			log.info({req: req}, '...Controller.putAccount().');
 		});
 	}).catch(err => {
-		sendError(req, res, err);
+		me.sendError(req, res, err);
 		return;
 	});
 }
@@ -250,7 +255,7 @@ Controller.prototype.getAccount = function(req, res) {
 
 		data.account.getInfo(function(err, result) {
 			if (err) {
-				sendError(req, res, err, 400);
+				me.sendError(req, res, err, 400);
 				return;
 			}
 	
@@ -261,13 +266,15 @@ Controller.prototype.getAccount = function(req, res) {
 				db.url = '/' + data.account.name + '/' + db.name;
 			});
 
+			result.login = me.getLoginInfo(req);
+
 			log.trace(result);
 			res.send(result); 
 			log.info({req: req}, '...Controller.getAccount().');
 		});
 
 	}).catch(err => {
-		sendError(req, res, err);
+		me.sendError(req, res, err);
 		return;
 	});		
 }
@@ -296,7 +303,7 @@ Controller.prototype.getDatabase = function(req, res) {
 		};		
 		data.db.getInfo(opts, function(err, result) {
 			if (err) {
-				sendError(req, res, err);
+				me.sendError(req, res, err);
 				return;
 			}
 	
@@ -308,11 +315,7 @@ Controller.prototype.getDatabase = function(req, res) {
 						+ '/' + data.db.name() + '/' + t.name;
 			});
 
-			result.login = {
-				user: req.user.name(),
-				principal: req.user.principal(),
-				timestamp: Field.dateToString(new Date())
-			}
+			result.login = me.getLoginInfo(req);
 
 			log.trace(result);
 			res.send(result); 
@@ -320,7 +323,7 @@ Controller.prototype.getDatabase = function(req, res) {
 		});
 
 	}).catch(err => {
-		sendError(req, res, err);
+		me.sendError(req, res, err);
 		return;
 	});
 }
@@ -343,18 +346,19 @@ Controller.prototype.putDatabase = function(req, res) {
 	
 		data.account.createDatabase(schema, function(err, db) {
 			if (err) {
-				sendError(req, res, err, 400);
+				me.sendError(req, res, err, 400);
 				return;
 			}
 			
 			db.getInfo(function(err, result) {
+				result.login = me.getLoginInfo(req);
 				res.send(result);
 			});
 			log.info({req: req}, '...Controller.putDatabase().');
 		});
 
 	}).catch(err => {
-		sendError(req, res, err);
+		me.sendError(req, res, err);
 		return;
 	});
 }
@@ -373,15 +377,18 @@ Controller.prototype.delDatabase = function(req, res) {
 		var opts = _.clone(req.query);
 		data.account.delDatabase(data.db.name(), opts, function(err, success) {
 			if (err) {
-				sendError(req, res, err, 400);
+				me.sendError(req, res, err, 400);
 				return;
 			}
-	
-			res.send({});
+
+			var result = {};
+			result.login = me.getLoginInfo(req);
+
+			res.send(result);
 			log.info('...Controller.delDatabase().');
 		});
 	}).catch(err => {
-		sendError(req, res, err);
+		me.sendError(req, res, err);
 		return;
 	});
 }
@@ -400,12 +407,21 @@ Controller.prototype.patchDatabase = function(req, res) {
 
 		var patches = req.body;
 		data.db.patchSchema(patches, function(err, result) {
+
 			if (err) {
 				//dont simply sendError but send old schema	as well
 				log.error({req: req, code: 400, err: err}, 'Controller.sendError()');
-				res.status(400).send({error: err.message, schema: result});
+				result = {
+					error: err.message, 
+					schema: result
+				}
+				result.login = me.getLoginInfo(req);
+				res.status(400).send(result);
 				return;
 			}
+
+			result.login = me.getLoginInfo(req);
+
 			log.trace({'res.body': result});
 			res.send(result); 
 			log.info({req: req}, '...Controller.patchDatabase().');
@@ -429,7 +445,7 @@ Controller.prototype.getCSVFile = function(req, res) {
 	}).then((access) => { 
 		res.sendFile(me.access.getNoncePath(req.query.nonce, "csv"), function(err) {
 			if (err) {
-				sendError(req, res, err);
+				me.sendError(req, res, err);
 				return;
 			}
 			me.access.deleteNonceFile(req.query.nonce, "csv"); //returns promise we don't have to await.
@@ -437,7 +453,7 @@ Controller.prototype.getCSVFile = function(req, res) {
 		});
 
 	}).catch(err => {
-		sendError(req, res, err);
+		me.sendError(req, res, err);
 		return;
 	});
 }
@@ -453,7 +469,7 @@ Controller.prototype.doNonceRequest = function(req, res) {
 		opts = {account: true, db: true, table: true };
 	} else {
 		var err = new Error("unknown nonce operation '" + req.body.path + "'");
-		sendError(req, res, err, 400);
+		me.sendError(req, res, err, 400);
 		return;		
 	}
 
@@ -471,16 +487,21 @@ Controller.prototype.doNonceRequest = function(req, res) {
 		me[op](req, data, function(err) {
 
 			if (err) {
-				sendError(req, res, err);
+				me.sendError(req, res, err);
 				return;
 			}
 
-			res.send({ nonce: nonce }); 
+			var result = {
+				nonce: nonce
+			};
+			result.login = me.getLoginInfo(req);
+
+			res.send(result); 
 			log.info({req: req}, '...Controller.requestNonce().');
 		});
 
 	}).catch(err => {
-		sendError(req, res, err);
+		me.sendError(req, res, err);
 		return;
 	});	
 }
@@ -520,7 +541,7 @@ Controller.prototype.getRows = function(req, res) {
 
 			function(err, result) { 
 				if (err) {
-					sendError(req, res, err, 400);
+					me.sendError(req, res, err, 400);
 					return;
 				}
 
@@ -528,6 +549,8 @@ Controller.prototype.getRows = function(req, res) {
 				if (result.nextOffset) {
 					result.nextUrl = me.nextUrl(req, result.nextOffset);
 				}
+
+				result.login = me.getLoginInfo(req);
 
 				log.trace(result);
 				res.send(result); 
@@ -537,7 +560,7 @@ Controller.prototype.getRows = function(req, res) {
 		);
 
 	}).catch(err => {
-		sendError(req, res, err);
+		me.sendError(req, res, err);
 		return;
 	});
 
@@ -585,7 +608,7 @@ Controller.prototype.getObjs = function(req, res) {
 	
 			function(err, result) { 
 				if (err) {
-					sendError(req, res, err, 400);
+					me.sendError(req, res, err, 400);
 					return;
 				}
 	
@@ -615,13 +638,15 @@ Controller.prototype.getObjs = function(req, res) {
 				result.objs = objs;
 				delete(result.rows);
 	
+				result.login = me.getLoginInfo(req);
+
 				log.trace(result);
 				res.send(result); 
 				log.info({req: req}, '...Controller.getObjs().');
 			}
 		);
 	}).catch(err => {
-		sendError(req, res, err);
+		me.sendError(req, res, err);
 		return;
 	});
 }
@@ -648,16 +673,19 @@ Controller.prototype.getStats = function(req, res) {
 			}, 
 			function(err, result) {
 				if (err) {
-					sendError(req, res, err, 400);
+					me.sendError(req, res, err, 400);
 					return;
 				}
+
+				result.login = me.getLoginInfo(req);
+
 				log.trace(result);
 				res.send(result); 
 				log.info({req: req}, '...Controller.getStats().');
 			}
 		);
 	}).catch(err => {
-		sendError(req, res, err);
+		me.sendError(req, res, err);
 		return;
 	});
 }
@@ -671,7 +699,7 @@ Controller.prototype.getViewRows = function(req, res) {
 
 	var viewName = req.params[2];
 	if ( ! viewName) {
-		sendError(req, res, new Error('Missing view parameter'), 404);
+		me.sendError(req, res, new Error('Missing view parameter'), 404);
 		return;
 	}	
 	
@@ -696,10 +724,12 @@ Controller.prototype.getViewRows = function(req, res) {
 	
 			function(err, result) { 
 				if (err) {
-					sendError(req, res, err, 400);
+					me.sendError(req, res, err, 400);
 					return;
 				}
 	
+				result.login = me.getLoginInfo(req);
+
 				log.trace(result);
 				res.send(result); 
 				funcs.stopHRTime(reqTime);
@@ -707,7 +737,7 @@ Controller.prototype.getViewRows = function(req, res) {
 			}
 		);
 	}).catch(err => {
-		sendError(req, res, err);
+		me.sendError(req, res, err);
 		return;
 	});
 }
@@ -737,16 +767,19 @@ Controller.prototype.postRows = function(req, res) {
 		opts.user = req.user;
 		data.db.insert(data.table.name, rows, opts, function(err, result) {
 			if (err) {
-				sendError(req, res, err, 400);
+				me.sendError(req, res, err, 400);
 				return;
 			}
+
+			result.login = me.getLoginInfo(req);
+
 			log.debug({'res.body': result});
 			res.send(result); 
 			log.info({req: req}, '...Controller.postRows().');
 		});
 
 	}).catch(err => {
-		sendError(req, res, err);
+		me.sendError(req, res, err);
 		return;
 	});
 }
@@ -774,9 +807,11 @@ Controller.prototype.putRows = function(req, res) {
 		opts.user = req.user;
 		data.db.update(data.table.name, rows, opts, function(err, result) {
 			if (err) {
-				sendError(req, res, err, 400);
+				me.sendError(req, res, err, 400);
 				return;
 			}
+
+			result.login = me.getLoginInfo(req);
 
 			log.debug({'res.body': result});
 			res.send(result);  
@@ -784,7 +819,7 @@ Controller.prototype.putRows = function(req, res) {
 		});
 
 	}).catch(err => {
-		sendError(req, res, err);
+		me.sendError(req, res, err);
 		return;
 	});
 }
@@ -805,15 +840,17 @@ Controller.prototype.delRows = function(req, res) {
 		
 		data.db.delete(data.table.name, rowIds, function(err, result) {
 			if (err) {
-				sendError(req, res, err, 400);
+				me.sendError(req, res, err, 400);
 				return;
 			}
+			result.login = me.getLoginInfo(req);
+
 			res.send(result); 
 			log.info({req: req}, '...Controller.delRows().');
 		});
 
 	}).catch(err => {
-		sendError(req, res, err);
+		me.sendError(req, res, err);
 		return;
 	});
 }
@@ -836,15 +873,17 @@ Controller.prototype.chownRows = function(req, res) {
 		var rowIds = req.body;
 		data.db.chown(data.table.name, rowIds, owner, function(err, result) {
 			if (err) {
-				sendError(req, res, err, 400);
+				me.sendError(req, res, err, 400);
 				return;
 			}
+			result.login = me.getLoginInfo(req);
+
 			res.send(result); 
 			log.info({req: req}, '...Controller.chownRows().');
 		});
 
 	}).catch(err => {
-		sendError(req, res, err);
+		me.sendError(req, res, err);
 		return;
 	});
 }
@@ -948,7 +987,8 @@ Controller.prototype.getRowsFromBody = function(req) {
 	return [];
 }
 
-function sendError(req, res, err, code) {
+Controller.prototype.sendError = function(req, res, err, code)
+{
 	if (parseInt(err.code) > 0) code = err.code;
 	else code = code || 500;
 
@@ -958,12 +998,24 @@ function sendError(req, res, err, code) {
 		log.warn({code: code, err: err, req: req}, err.message);
 	}
 
-	res.status(code).send({error: err.message});
-}
+	var result = {
+		error: err.message
+	};
+	result.login = this.getLoginInfo(req);
 
+	res.status(code).send(result);
+}
 
 Controller.prototype.account = function(name) {
 	return this.accountManager.get(name);
+}
+
+Controller.prototype.getLoginInfo = function(req) {
+	return {
+		user: req.user.name(),
+		principal: req.user.principal(),
+		timestamp: Field.dateToString(new Date())
+	}
 }
 
 Controller.prototype.getDataObjects = function(req, objs) {
