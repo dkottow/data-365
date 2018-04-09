@@ -16,25 +16,36 @@ Donkeylift.FilterRangeView = Backbone.View.extend({
 	render: function() {
 		this.$('a[href=#filterRange]').tab('show');
 
-		this.renderMinMaxInputs();
-		this.renderSlider();
-		this.renderDateTimePicker();
+		this._renderMinMaxInputs();
+		this._renderSlider();
+		this._renderDateTimePicker();
 
 	},
 
 	evInputFilterChange: function(ev) {
+
+		var filterValues, boundValues;
 		var stats = this.model.get('field').get('stats');
 
-		//this.sanitizeInputFilterValue(ev.target, stats);
-
-		var filterValues = [$("#inputFilterMin").val(),
-							$("#inputFilterMax").val() ];
-
-		if (this.canSlide()) {
-			filterValues[0] = parseFloat(filterValues[0]);
-			filterValues[1] = parseFloat(filterValues[1]);
+		if (this._canSlide()) {
+			filterValues = [
+				parseFloat($("#inputFilterMin").val()),
+				parseFloat($("#inputFilterMax").val())
+			];
 			$('#inputSliderRange').slider('setValue', filterValues, false, false);
+
+		} else if (this._isDatetime()) {
+			filterValues = [
+				$('#inputFilterMin').data("DateTimePicker").date().toISOString(),
+				$('#inputFilterMax').data("DateTimePicker").date().toISOString()
+			];
+
+		} else {
+			filterValues = [ $("#inputFilterMin").val(), $("#inputFilterMax").val() ];
 		}
+
+		if (filterValues[0] < stats.min) filterValues[0] = stats.min;
+		if (filterValues[1] > stats.max) filterValues[1] = stats.max;
 
 		if (filterValues[0] != stats.min || filterValues[1] != stats.max) {
 			Donkeylift.app.filters.setFilter({
@@ -61,7 +72,7 @@ Donkeylift.FilterRangeView = Backbone.View.extend({
 		this.render();
 	},
 	
-	renderMinMaxInputs: function() {
+	_renderMinMaxInputs: function() {
 		var stats = this.model.get('field').get('stats');
 
 		var current = Donkeylift.app.filters.getFilter(
@@ -76,13 +87,13 @@ Donkeylift.FilterRangeView = Backbone.View.extend({
 			max = stats.max;
 		}	
 
-		this.$("#inputFilterMin").val(this.model.get('field').toFS(min));
-		this.$("#inputFilterMax").val(this.model.get('field').toFS(max));
+		$("#inputFilterMin").val(this.model.get('field').toFS(min));
+		$("#inputFilterMax").val(this.model.get('field').toFS(max));
 	},
 
-	renderSlider: function() {
+	_renderSlider: function() {
 
-		if (this.canSlide()) {
+		if (this._canSlide()) {
 
 			$('#sliderRange').show();
 			$('#inputSliderRange').css('width', '100%');
@@ -120,7 +131,6 @@ Donkeylift.FilterRangeView = Backbone.View.extend({
 			} else {
 				//just set the value
 				$('#inputSliderRange').slider('setValue', sliderValues);
-				//$('#inputSliderRange').attr('data-slider-value', sliderValues);
 			}			
 		} else {
 			$('#sliderRange').hide();
@@ -128,17 +138,14 @@ Donkeylift.FilterRangeView = Backbone.View.extend({
 		
 	},
 
-	renderDateTimePicker: function() {
+	_renderDateTimePicker: function() {
 		var me = this;
-		var dateTypes = [
-			Donkeylift.Field.TYPES.date,
-			Donkeylift.Field.TYPES.timestamp
-		];
-		var fieldType = this.model.get('field').get('type');
 
-		if ( ! _.contains(dateTypes, fieldType)) {
+		if ( ! this._isDatetime()) {
 			return;
 		}
+
+		var fieldType = this.model.get('field').get('type');
 
 		var opts = {
 			disabledHours: fieldType == Donkeylift.Field.TYPES.DATE,
@@ -167,14 +174,7 @@ Donkeylift.FilterRangeView = Backbone.View.extend({
 				*/
 
 			if (ev.oldDate) {
-/*
-				$("#inputFilterMin").attr('data-value', 
-					$('#inputFilterMin').data("DateTimePicker").date().toISOString()
-				);
-				$("#inputFilterMax").attr('data-value', 
-					$('#inputFilterMax').data("DateTimePicker").date().toISOString()
-				);
-*/
+
 				me.evInputFilterChange(ev);
 			}
 
@@ -188,24 +188,16 @@ Donkeylift.FilterRangeView = Backbone.View.extend({
 
 	},
 	
-	sanitizeInputFilterValue: function(el, stats) {
-		var minRange, maxRange;
-		if (/Min$/.test(el.id)) {
-			minRange = this.model.get('field').parse(stats.min);
-			maxRange = this.model.get('field').parse($("#inputFilterMax").val()); 
-		} else {
-			minRange = this.model.get('field').parse($("#inputFilterMin").val());
-			maxRange = this.model.get('field').parse(stats.max); 
-		}
+	_isDatetime: function() {
+		var dateTypes = [
+			Donkeylift.Field.TYPES.date,
+			Donkeylift.Field.TYPES.timestamp
+		];
 
-		var val = this.model.get('field').parse(el.value);
-		if (val < minRange) val = minRange;
-		if (val > maxRange) val = maxRange;
-		$(el).val(this.model.get('field').toFS(val));
-
+		return _.contains(dateTypes, this.model.get('field').get('type'));
 	},
-
-	canSlide: function() {
+	
+	_canSlide: function() {
 		if (this.model.get('field').get('fk')) return false;
 
 		return _.contains([
