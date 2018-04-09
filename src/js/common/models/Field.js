@@ -236,8 +236,10 @@ Donkeylift.Field = Backbone.Model.extend({
 
 	setStats: function(stats) {
 		this.set('stats', {
-			min: this.toFS(stats.min),
-			max: this.toFS(stats.max)
+			//min: this.toFS(stats.min),
+			//max: this.toFS(stats.max)
+			min: stats.min,
+			max: stats.max
 		});		
 	}
 

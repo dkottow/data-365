@@ -39,7 +39,7 @@
         "transports": [
             {
                 "type": "console",
-                "level": "silly",
+                "level": "debug",
                 "colorize": true
             }
         ]

@@ -26,6 +26,7 @@ Donkeylift.FilterItemsView = Backbone.View.extend({
 	},
 
 	render: function() {
+		var field = this.model.get('field');
 		this.$('a[href=#filterSelect]').tab('show');
 
 		this.$('#filterSelection').empty();
@@ -40,17 +41,18 @@ Donkeylift.FilterItemsView = Backbone.View.extend({
 			_.each(selected, function(val) {
 				this.$('#filterSelection').append(this.template({
 					name: 'filter-selected',
-					value: val
+					value: val,
+					label: field.toFS(val) 
 				}));
 			}, this);
 		}
 
 		this.$('#filterOptions').empty();
-		var field = this.model.get('field');
 		_.each(field.get('options'), function(opt) {
 			this.$('#filterOptions').append(this.template({
 				name: 'filter-option',
-				value: field.toFS(opt[field.vname()])
+				value: opt[field.vname()],
+				label: field.toFS(opt[field.vname()])
 			}));
 		}, this);
 	},
@@ -58,7 +60,7 @@ Donkeylift.FilterItemsView = Backbone.View.extend({
 	setFilter: function() {
 		var filterValues = this.$('#filterSelection').children()
 			.map(function() {
-				return $(this).attr('data-target');
+				return $(this).attr('data-value');
 		}).get();
 
 		Donkeylift.app.filters.setFilter({
@@ -80,14 +82,16 @@ Donkeylift.FilterItemsView = Backbone.View.extend({
 	evFilterOptionClick: function(ev) {
 		ev.stopPropagation();
 		//console.log(ev.target);
-		var opt = $(ev.target).attr('data-target');
-		var attr = '[data-target="' + opt + '"]';
+		var field = this.model.get('field');
+		var val = $(ev.target).attr('data-value');
+		var attr = '[data-value="' + val + '"]';
 
 		//avoid duplicate items in filterSelection
 		if (this.$('#filterSelection').has(attr).length == 0) {
 			var item = this.template({
 				name: 'filter-selected',
-				value: opt
+				value: val,
+				label: field.toFS(val)
 			});
 			this.$('#filterSelection').append(item);
 			this.setFilter();

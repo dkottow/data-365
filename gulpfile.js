@@ -260,7 +260,7 @@ gulp.task('build-dl-3rdparty-js', function () {
 		, inputs.SRC_3RDPARTY_DIR + 'bootstrap-slider/bootstrap-slider.min.js'
 		, inputs.SRC_3RDPARTY_DIR + 'clipboard.js/clipboard.min.js'
 		, inputs.SRC_3RDPARTY_DIR + 'bootstrap-select/js/bootstrap-select.min.js'
-		, inputs.SRC_3RDPARTY_DIR + 'momentjs/moment.min.js'
+		, inputs.SRC_3RDPARTY_DIR + 'momentjs/moment-with-locales.min.js'
 		, inputs.SRC_3RDPARTY_DIR + 'bootstrap-datetimepicker/js/bootstrap-datetimepicker.min.js'
 
 		, inputs.SRC_3RDPARTY_DIR + 'adal-1.0.15/adal.min.js'

@@ -25,7 +25,7 @@ Donkeylift.FilterRangeView = Backbone.View.extend({
 	evInputFilterChange: function(ev) {
 		var stats = this.model.get('field').get('stats');
 
-		this.sanitizeInputFilterValue(ev.target, [stats.min, stats.max]);
+		//this.sanitizeInputFilterValue(ev.target, stats);
 
 		var filterValues = [$("#inputFilterMin").val(),
 							$("#inputFilterMax").val() ];
@@ -67,14 +67,17 @@ Donkeylift.FilterRangeView = Backbone.View.extend({
 		var current = Donkeylift.app.filters.getFilter(
 						this.model.get('table'),
 						this.model.get('field'));
-
+		var min, max;	
 		if (current && current.get('op') == Donkeylift.Filter.OPS.BETWEEN) {
-			this.$("#inputFilterMin").val(current.get('value')[0]);
-			this.$("#inputFilterMax").val(current.get('value')[1]);
+			min = current.get('value')[0];
+			max = current.get('value')[1];
 		} else {
-			this.$("#inputFilterMin").val(stats.min);
-			this.$("#inputFilterMax").val(stats.max);
-		}		
+			min = stats.min;
+			max = stats.max;
+		}	
+
+		this.$("#inputFilterMin").val(this.model.get('field').toFS(min));
+		this.$("#inputFilterMax").val(this.model.get('field').toFS(max));
 	},
 
 	renderSlider: function() {
@@ -131,79 +134,74 @@ Donkeylift.FilterRangeView = Backbone.View.extend({
 			Donkeylift.Field.TYPES.date,
 			Donkeylift.Field.TYPES.timestamp
 		];
-		if (_.contains(dateTypes, this.model.get('field').get('type'))) {
+		var fieldType = this.model.get('field').get('type');
 
-			var opts = {
-				debug: false,
-				format: 'YYYY-MM-DD',
-				widgetPositioning: {
-					horizontal: 'auto',
-					vertical: 'bottom'
-				}
-			}
-
-			if (this.model.get('field').get('type') == Donkeylift.Field.TYPES.timestamp) {
-				opts.format = 'YYYY-MM-DDTHH:mm:ss.SSS';
-			}
-
-			var evChangeDate = function(ev) {
-
-				/* we need some massaging on date event handling:
-				 *    1) only trigger filter event if date changes.
-				 *    2) if input value is of type timestamp, 
-				 * 		 we force it to be UTC by making sure the datetime string ends with Z.
-				 */
-
-				if (ev.oldDate) {
-					$("#inputFilterMin").val(
-						Donkeylift.Field.forceUTCDateString($("#inputFilterMin").val())
-					);
-					$("#inputFilterMax").val(
-						Donkeylift.Field.forceUTCDateString($("#inputFilterMax").val())
-					);
-					me.evInputFilterChange(ev);
-				}
-			}
-
-			$('#inputFilterMin').on('dp.change', evChangeDate);
-			$('#inputFilterMax').on('dp.change', evChangeDate);
-
-			$("#inputFilterMin").datetimepicker(opts);
-			$("#inputFilterMax").datetimepicker(opts);
+		if ( ! _.contains(dateTypes, fieldType)) {
+			return;
 		}
 
-/* bootstrap-datepicker
-		var dateTypes = [
-			Donkeylift.Field.TYPES.date
-		];
-		if (_.contains(dateTypes, this.model.get('field').get('type'))) {
+		var opts = {
+			disabledHours: fieldType == Donkeylift.Field.TYPES.DATE,
+			debug: false,
+			widgetPositioning: {
+				horizontal: 'auto',
+				vertical: 'bottom'
+			}
+		}
 
-			//$("#inputFilterMin").attr('type', 'date');
-			//$("#inputFilterMax").attr('type', 'date');
+		if (Donkeylift.app.schema.localizeDatetime()) {
+			opts.locale = navigator.language;
+			if (fieldType == Donkeylift.Field.TYPES.date) opts.format = 'L';
+		} else if (fieldType == Donkeylift.Field.TYPES.date) {
+			opts.format = 'YYYY-MM-DD';
+		} else if (fieldType == Donkeylift.Field.TYPES.timestamp) {
+			opts.format = 'YYYY-MM-DDTHH:mm:ss.SSS';
+		}
 
-			var opts = {
-				format: 'yyyy-mm-dd',
-				orientation: 'bottom'
+		var evChangeDate = function(ev) {
+
+			/* we need some massaging on date event handling:
+				*    1) only trigger filter event if date changes.
+				*    2) if input value is of type timestamp, 
+				* 		 we force it to be UTC by making sure the datetime string ends with Z.
+				*/
+
+			if (ev.oldDate) {
+/*
+				$("#inputFilterMin").attr('data-value', 
+					$('#inputFilterMin').data("DateTimePicker").date().toISOString()
+				);
+				$("#inputFilterMax").attr('data-value', 
+					$('#inputFilterMax').data("DateTimePicker").date().toISOString()
+				);
+*/
+				me.evInputFilterChange(ev);
 			}
 
-			$("#inputFilterMin").datepicker(opts);
-			$("#inputFilterMax").datepicker(opts);
 		}
-*/		
+
+		$('#inputFilterMin').on('dp.change', evChangeDate);
+		$('#inputFilterMax').on('dp.change', evChangeDate);
+
+		$("#inputFilterMin").datetimepicker(opts);
+		$("#inputFilterMax").datetimepicker(opts);
+
 	},
 	
-	sanitizeInputFilterValue: function(el, bounds) {
-
+	sanitizeInputFilterValue: function(el, stats) {
+		var minRange, maxRange;
 		if (/Min$/.test(el.id)) {
-			bounds = [bounds[0], parseFloat($("#inputFilterMax").val()) ];
+			minRange = this.model.get('field').parse(stats.min);
+			maxRange = this.model.get('field').parse($("#inputFilterMax").val()); 
 		} else {
-			bounds = [ parseFloat($("#inputFilterMin").val()), bounds[1]];
+			minRange = this.model.get('field').parse($("#inputFilterMin").val());
+			maxRange = this.model.get('field').parse(stats.max); 
 		}
 
 		var val = this.model.get('field').parse(el.value);
-		if (val < bounds[0]) val = bounds[0];
-		if (val > bounds[1]) val = bounds[1];
-		$(el).val(val);
+		if (val < minRange) val = minRange;
+		if (val > maxRange) val = maxRange;
+		$(el).val(this.model.get('field').toFS(val));
 
 	},
 
