@@ -13,8 +13,12 @@ body {
 	top: 50px;
 }
 
+#module {
+	margin-top: -0.8em;
+}
+
 #main {
-	margin-top: 40px;
+	margin-top: 1.5em;
 }
 
 #ajax-progress-spinner {
@@ -30,7 +34,7 @@ body {
 }
 
 #menu {
-  margin-top: 10px;	
+  margin-top: -3em;	
   margin-left: 1em;	
 }
 
@@ -94,6 +98,10 @@ body {
 #toggle-sidebar {
 	margin-left: -20px;
 	margin-right: 20px;
+}
+
+.fa {
+	display: inline;
 }
 
 .tab-pane {
