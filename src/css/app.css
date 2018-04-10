@@ -3,18 +3,21 @@ body {
 	background-color: white;
 }
 
-.navbar-nav > li > a, .navbar-brand {
-    padding-top:10px !important; padding-bottom:0 !important;
-    height: 40px;
+#wrapper {
+	margin: 0.5em;
 }
-.navbar {min-height:30px !important;}
 
-.side-nav {
-	top: 50px;
+#sidebar {
+	width: 15%;
+}
+
+#module {
+	margin-top: -0.8em;
+	width: 85%;
 }
 
 #main {
-	margin-top: 40px;
+	margin-top: 1.5em;
 }
 
 #ajax-progress-spinner {
@@ -30,7 +33,7 @@ body {
 }
 
 #menu {
-  margin-top: 10px;	
+  margin-top: -3em;	
   margin-left: 1em;	
 }
 
@@ -77,6 +80,10 @@ body {
 	border: 0;
 }
 
+.table-item {
+	padding: 7px 7px;
+}
+
 #nav-login {
 	color: darkred;
 	font-weight: bold;
@@ -94,6 +101,10 @@ body {
 #toggle-sidebar {
 	margin-left: -20px;
 	margin-right: 20px;
+}
+
+.fa {
+	display: inline;
 }
 
 .tab-pane {
@@ -313,8 +324,4 @@ ul.dt-button-collection.dropdown-menu {
 
 button, .btn {
 	min-width: 0;
-}
-
-.col-sm-3 {
-	max-width: 16em;
 }

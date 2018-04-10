@@ -65,6 +65,7 @@ var tasks = [
 	'copy-webapi-css',
 	
 	'copy-images',
+	'copy-favicon',
 	'copy-fonts'
 ];
 
@@ -310,6 +311,14 @@ gulp.task('copy-fonts', function () {
 	.pipe(gulp.dest(outputs.CONTENT_DIR + 'fonts'));
 });
 
+gulp.task('copy-favicon', function() {
+
+	return gulp.src([
+			'./src/images/favicon.ico'
+		])
+
+		.pipe(gulp.dest(outputs.CONTENT_DIR));
+});
 
 gulp.task('copy-images', function() {
 
