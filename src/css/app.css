@@ -7,12 +7,6 @@ body {
 	margin: 0;
 }
 
-#sidebar {
-}
-
-#module {
-}
-
 .sidebar-def {
 	width: 15%;
 }
@@ -27,10 +21,6 @@ body {
 
 .module-full {
 	width: 100%;
-}
-
-#module {
-	margin-top: -0.8em;
 }
 
 #main {
