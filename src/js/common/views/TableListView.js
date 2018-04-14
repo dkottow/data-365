@@ -24,7 +24,7 @@ Donkeylift.TableListView = Backbone.View.extend({
 	render: function() {
 		var me = this;
 		console.log('TableListView.render ');	
-		this.$el.html(this.template({ database: me.model.get('name') }));
+		this.$el.html(this.template());
 		var tables = this.collection.getAll(); //sorted alphabetically
 		_.each(tables, function(table) {
 			if (table.visible()) {

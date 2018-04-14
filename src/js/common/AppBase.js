@@ -66,12 +66,9 @@ function AppBase(params) {
 	var me = this;
 
   Donkeylift.env.server = params.server;
-  this.id_token = params.id_token;
 
-  console.log('AppBase ctor');
+  console.log('AppBase ctor', params);
 	
-	this.navbarView = new Donkeylift.NavbarView();
-
 	$('#toggle-sidebar').click(function() {
 		me.toggleSidebar();
 	}); 
@@ -88,138 +85,18 @@ function AppBase(params) {
 AppBase.prototype.start = function(params, cbAfter) {
 	var me = this;
 
-  me.setAccount({
-    user: params.user,
-    account: params.account
-  }, function() {
-    if (params.database) {
-      me.setSchema(params.database, cbAfter);
-    } else {
-      me.listSchemas(params.user, cbAfter);    
-    }
-  });
-
+  if (params.d365_database) {
+    //me.schemas = null;
+    me.setSchema(params.d365_database, cbAfter);
+  } else {
+    me.listSchemas(cbAfter);    
+  }
+  
 }
 
-
-AppBase.prototype.masterUrl = function() {
+AppBase.prototype.masterRoot = function() {
   //TODO use fixed URL such as /d365.master which is resolved by api to the right master db. 
   return Donkeylift.env.server + '/_d365/_d365Master';
-}
-
-AppBase.prototype.getSiteConfig = function(siteUrl, cbAfter) {  
-  console.log('AppBase.getSiteConfig..');
-  var query = '$select=Databases.name,Account.name' + '&'
-            + "$filter=SiteUrl eq '" + siteUrl + "'";
-  var url = this.masterUrl() + '/Applications.rows' + '?' + query;
-  Donkeylift.ajax(url, {
-
-  }).then(function(result) {
-    var response = result.response;
-    console.log(response);
-    if (response.rows.length > 0) {
-      var result = {
-        account: response.rows[0]['Account$name'],
-        database: response.rows[0]['Databases$name']
-      };
-      cbAfter(null, result);
-
-    } else {
-      var err = new Error("Site '" + siteUrl + "' configuration not found on master database.");
-      cbAfter(err);
-    }
-
-  }).catch(function(result) {
-    console.log("Error requesting " + url);
-    var err = new Error(result.jqXHR.responseText);
-    console.log(err);
-    alert(err.message);
-    cbAfter(err);
-  });         
-}
-
-AppBase.prototype.setAccount = function(params, cbAfter) {
-	var me = this;
-  console.log('setAccount...');
-  console.log(JSON.stringify(params));
-
-  params.reset = params.reset || (!! params.account); 
-  
-	this.account = new Donkeylift.Account(params);
-
-  this.navbarView.model = this.account;
-  me.navbarView.render();
-
-  me.menuView.render();
-  $('#content').empty();
-
-  if (params.reset) me.unsetSchema();
-  cbAfter();
-	$('#toggle-sidebar').hide();
-}
-
-AppBase.prototype.toggleSidebar = function() {
-	if ($('#table-list').is(':visible')) {
-    $('.profile-info').hide('slide');
-    $('#menu').hide();
-    $('#table-list').hide('slide', function() {
-      $('#module').toggleClass('col-sm-16 col-sm-13');             
-      $('#sidebar').toggleClass('col-sm-3 col-sm-0');
-    });
-	} else {
-		$('#module').toggleClass('col-sm-16 col-sm-13');             
-		$('#sidebar').toggleClass('col-sm-3 col-sm-0');
-    $('#table-list').show('slide');
-    $('#menu').show('slide');
-    $('.profile-info').show('slide');
-	}
-}
-
-AppBase.prototype.createTableView = function(table, params) {
-	//overwrite me
-}
-
-AppBase.prototype.setTable = function(table, params) {
-	console.log('app.setTable ' + params);
-
-	var $a = $("#table-list a[data-target='" + table.get('name') + "']");
-	$('#table-list a').removeClass('active');
-	$a.addClass('active');
-
-  this.unsetTable();
-
-	this.table = table;
-	this.tableView = this.createTableView(table, params);
-
-	$('#content').html(this.tableView.el);
-	this.tableView.render();
-	
-	this.menuView.render();
-}
-
-AppBase.prototype.resetTable = function() {
-	if (this.table) this.setTable(this.table);
-}
-
-AppBase.prototype.unsetTable = function() {
-	this.table = null;
-	if (this.tableView) this.tableView.remove();
-}
-
-AppBase.prototype.addAncestorFieldsToSelect = function($select) {
-  var aliasTables = [ this.table ]
-      .concat(this.schema.get('tables').getAncestors(this.table));
-        
-  _.each(aliasTables, function(table) {
-    var $opt = $('<optgroup label="' + table.get('name') + '"></optgroup>');
-    table.get('fields').each(function(field) {
-      var qn = table.getFieldQN(field);
-      $opt.append($('<option></option>')
-        .attr('value', qn)
-        .text(field.get('name')));
-    }, this);
-    $select.append($opt);
-  });
 }
 
 /**** schema stuff ****/
@@ -231,21 +108,24 @@ AppBase.prototype.listSchemas = function(userPrincipalName, cbAfter) {
   var query = "";
   //query += "&$filter=UserPrincipalName eq '" + userPrincipalName + "'";
 
-  var url = this.masterUrl() + '/_d365AdminDatabases.view' + '?' + query;
+  var url = this.masterRoot() + '/_d365AdminDatabases.view' + '?' + query;
   Donkeylift.ajax(url, {
 
   }).then(function(result) {
-    var response = result.response;
-    console.log(response);
-
-    me.schemas = Donkeylift.Schemas.Create(response.rows, { user: userPrincipalName });
-		me.schemaListView = new Donkeylift.SchemaListView({
-			collection: me.schemas
-		});
-    $('#sidebar').append(me.schemaListView.el);
-    me.schemaListView.render();
-    if (cbAfter) cbAfter();
-
+    try {
+      var response = result.response;
+      console.log(response);
+      me.user = new Donkeylift.User(response.login);
+      me.schemas = Donkeylift.Schemas.Create(response.rows, { user: me.user.upn() });
+      me.navbarView = new Donkeylift.NavbarView({ 
+        model: {
+          schemas: me.schemas,
+          user: me.user
+        }
+      });
+      me.navbarView.render();
+      if (cbAfter) cbAfter();
+    } catch(err) { console.log(err); }
   }).catch(function(result) {
     console.log("Error requesting " + url);
     var err = new Error(result.jqXHR.responseText);
@@ -260,7 +140,7 @@ AppBase.prototype.unsetSchema = function() {
 	if (this.tableListView) this.tableListView.remove();
 	this.unsetTable();
 	$('#content').empty();
-	this.navbarView.render();
+  this.navbarView.render();
 }
 
 AppBase.prototype.createSchema = function(name) {
@@ -293,14 +173,13 @@ AppBase.prototype.setSchema = function(name, opts, cbAfter) {
     me.tableListView.render();
 		$('#toggle-sidebar').show();
 
-		me.menuView.render();
+		me.navbarView.render();
 	}
 
 	if (reload) {
 		this.unsetSchema();
 		this.schema = this.createSchema(name); //impl in AppData / AppSchema
     this.schema.fetch(function() {
-      me.account.set('principal', me.schema.get('login').principal);
       updateViewsFn();
       if (cbAfter) cbAfter();
 		});
@@ -315,12 +194,80 @@ AppBase.prototype.setSchema = function(name, opts, cbAfter) {
 	}
 }
 
+/*** table stuff ****/
+
+AppBase.prototype.createTableView = function(table, params) {
+	//overwrite me
+}
+
+AppBase.prototype.setTable = function(table, params) {
+	console.log('app.setTable ' + params);
+
+	var $a = $("#table-list a[data-target='" + table.get('name') + "']");
+	$('#table-list a').removeClass('active');
+	$a.addClass('active');
+
+  this.unsetTable();
+
+	this.table = table;
+	this.tableView = this.createTableView(table, params);
+
+	$('#content').html(this.tableView.el);
+	this.tableView.render();
+	
+	this.menuView.render();
+}
+
+AppBase.prototype.resetTable = function() {
+	if (this.table) this.setTable(this.table);
+}
+
+AppBase.prototype.unsetTable = function() {
+	this.table = null;
+	if (this.tableView) this.tableView.remove();
+}
+
+/*** misc  ***/
+
+AppBase.prototype.toggleSidebar = function() {
+	if ($('#table-list').is(':visible')) {
+    $('#table-list').hide('slide', function() {
+      $('#module').toggleClass('module-def module-full');             
+      $('#sidebar').toggleClass('sidebar-def sidebar-full');
+      $('#menu').hide();
+      $('#grid_wrapper div:first').hide();
+    });
+	} else {
+		$('#module').toggleClass('module-full module-def');             
+		$('#sidebar').toggleClass('sidebar-full sidebar-def');
+    $('#table-list').show('slide');
+    $('#menu').show('slide');
+    $('#grid_wrapper div:first').show('slide');
+	}
+}
+
 AppBase.prototype.getProp = function(key) {
   return this.schema.get('props').getProp(key);
 }
   
 AppBase.prototype.setProp = function(key, value) {
   return this.schema.get('props').setProp(key, value);
+}
+
+AppBase.prototype.addAncestorFieldsToSelect = function($select) {
+  var aliasTables = [ this.table ]
+      .concat(this.schema.get('tables').getAncestors(this.table));
+        
+  _.each(aliasTables, function(table) {
+    var $opt = $('<optgroup label="' + table.get('name') + '"></optgroup>');
+    table.get('fields').each(function(field) {
+      var qn = table.getFieldQN(field);
+      $opt.append($('<option></option>')
+        .attr('value', qn)
+        .text(field.get('name')));
+    }, this);
+    $select.append($opt);
+  });
 }
 
 /******* init on script load ******/

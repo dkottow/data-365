@@ -7,24 +7,29 @@ Donkeylift.SchemaListView = Backbone.View.extend({
 	className: 'dropdown-menu',
 */
 	events: {
-		'change #selectDatabase': 'evSchemaChange',
+		'click a': 'evSchemaChange',
 	},
 
 	initialize: function() {
 	},
 
-	template: _.template($('#schema-list-template').html()),
+	el: '#selectDatabase',
+
+	template: _.template($('#nav-schema-template').html()),
 
 	render: function() {
 
-		this.$el.html(this.template());
+		this.$el.empty();
 		this.renderSchemaList();
 		this.renderCurrentSchemaName();
+
+		this.delegateEvents();
 
 		return this;
 	},
 
 	renderSchemaList: function() {
+		var me = this;
 		var accounts = this.collection.groupBy(function(schema) {
 			return schema.get('account');
 		});
@@ -34,39 +39,35 @@ Donkeylift.SchemaListView = Backbone.View.extend({
 			});
 
 			if (ownedSchemas.length > 0) {
-				$('#selectDatabase').append(
-					$('<optgroup></optgroup>')
-						.attr('label', account)
+				this.$el.append(
+					$('<li>' + account + '</li>')
+						.attr('class', 'dropdown-header')					
 				);
-				_.each(ownedSchemas, function(schema) {
-					$('#selectDatabase optgroup').last().append(
-						$('<option></option>')
-							.attr('value', schema.fullName())
-							.text(schema.get('name'))
-					);
-					console.log(schema.fullName());
-				});	
 			}
-		});
-		$('#selectDatabase').selectpicker('refresh');
+
+			_.each(ownedSchemas, function(schema) {
+				this.$el.append(this.template({ 
+					name: schema.get('name'), 
+					value : schema.fullName() 
+				}));
+				console.log(schema.fullName());
+			}, this);
+
+		}, this);
 	},
 
 	renderCurrentSchemaName: function() {
-/*
 		var $span = this.$el.closest('li').find('a:first span');
 		if (Donkeylift.app.schema) {
-			$span.html(' DB ' + Donkeylift.app.schema.get('name'));
+			$span.html(' ' + Donkeylift.app.schema.get('name') + ' ');
 		} else {
 			$span.html(' Choose DB ');
 		}		
-*/
 	},
 
 	evSchemaChange: function(ev) {
-		console.log('SchemaListView.evSchemaChange ' + $(ev.target).val());
-		var parts = $(ev.target).val().split('$');
-		Donkeylift.app.account.set('name', parts[0]);
-		Donkeylift.app.setSchema(parts[1], { reload: true });			
+		console.log('SchemaListView.evSchemaChange ' + $(ev.target).attr('data-target'));
+		Donkeylift.app.setSchema($(ev.target).attr('data-target'), { reload: true });
 	},
 
 });

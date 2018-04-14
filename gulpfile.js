@@ -87,6 +87,13 @@ gulp.task('build-data-html', function () {
 
     return gulp.src([ inputs.SRC_DIR + 'html/data.html' ])
 
+		.pipe(inject(gulp.src('./src/html/common/nav.html'), {
+			starttag: '<!-- inject:nav:{{ext}} -->',
+			transform: function (filePath, file) {
+			return file.contents.toString('utf8')
+			}
+		}))
+
 		.pipe(inject(gulp.src(snippets.dialogs), {
 		    starttag: '<!-- inject:dialogs:{{ext}} -->',
 		    transform: function (filePath, file) {

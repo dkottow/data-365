@@ -4,20 +4,33 @@ body {
 }
 
 #wrapper {
-	margin: 0.5em;
+	margin: 0;
 }
 
 #sidebar {
-	width: 15%;
 }
 
 #module {
-	margin-top: -0.8em;
+}
+
+.sidebar-def {
+	width: 15%;
+}
+
+.sidebar-full {
+	display: none;
+} 
+
+.module-def {
 	width: 85%;
 }
 
+.module-full {
+	width: 100%;
+}
+
 #main {
-	margin-top: 1.5em;
+	margin-top: 4em;
 }
 
 #ajax-progress-spinner {
@@ -29,11 +42,10 @@ body {
 }
 
 #grid-panel {
-	padding: 1em;
+	padding: 0;
 }
 
 #menu {
-  margin-top: -3em;	
   margin-left: 1em;	
 }
 
@@ -49,18 +61,8 @@ body {
 }
 
 .database-info, .user-info {
-	margin-top: 10px;
+	color: black;
 	font-weight: bold;	
-	overflow: hidden;
-}
-
-.database-info {
-	margin-left: 5px;
-}
-
-.user-info {
-	margin-right: 15px;
-	text-align: right;
 }
 
 #table-list {

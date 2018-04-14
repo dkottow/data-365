@@ -8,7 +8,6 @@ Donkeylift.Account = Backbone.Model.extend({
 
 		this.set('name', attrs.account);
 		this.set('user', attrs.user);
-		this.set('id_token', attrs.id_token);
 	},
 
 	url	: function() { 
@@ -21,8 +20,8 @@ Donkeylift.Account = Backbone.Model.extend({
 		return response;
 	},
 
-	principal: function() {
-		return this.get('principal') || this.get('user');
+	userInfo: function() {
+		return this.get('user') + ' | ' + this.get('principal');
 	},
 
 	isAdmin : function() {

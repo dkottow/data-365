@@ -6,23 +6,20 @@ Donkeylift.NavbarView = Backbone.View.extend({
 	events: {
 	},
 
-	initialize: function() {
+	initialize: function(attrs) {
+		this.schemaListView = new Donkeylift.SchemaListView({
+			collection: attrs.model.schemas,
+		});
 	},
 
-	navUserInfoTemplate: _.template($('#nav-user-info-template').html()),
-
 	render: function() {
+		this.schemaListView.render();
 		this.renderUserInfo();
 		return this;
 	},
 
 	renderUserInfo: function() {
-		var $el = $('#user-info');
-		$el.empty();	
-		var html = this.navUserInfoTemplate({
-			user: this.model.principal()
-		});
-		$el.append(html);
+		$('#user-info').html(' ' + this.model.user.userInfo() + ' ');	
 	}
 
 });

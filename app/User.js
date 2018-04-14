@@ -25,7 +25,8 @@ User.PROCEDURES = {
     ACCESS_USER: '_d365Access'
 }
 
-User.EVERYONE = 'Everyone'; //used in AccessControl.filterQuery and Database.rowsOwned
+User.EVERYONE = 'everyone'; //used in AccessControl.filterQuery and Database.rowsOwned
+User.ADMIN = "admin";
 User.NOBODY = 'unknown';
 User.SYSTEM = 'system';
 
@@ -38,7 +39,9 @@ User.SystemUser = function() {
 }
 
 User.prototype.principal = function() {
-    return this._principal || this._name || User.EVERYONE;
+    if (this._admin) return User.ADMIN;
+    if (this._principal) return this._principal;
+    return User.EVERYONE;
 }
 
 User.prototype.isAdmin = function(opts) {

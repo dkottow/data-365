@@ -71,11 +71,13 @@ AccessControl.prototype.authorize = function(op, req, path) {
 		return rejectFn(util.format("Action '%s' requires authenticated user", op));
 	}
 
-//TODO remove me after pilot	
+//remove me after pilot	
+/*
 if (req.user.name() == User.NOBODY) {
 	log.debug('AccessControl.authorize() temporary passthrough'); 
 	return resolveFn(true, 'User.NOBODY enabled temporary');
 }
+*/
 
 	path = path || {};
 	var scope = {

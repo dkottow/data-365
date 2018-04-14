@@ -4,6 +4,10 @@ Donkeylift.Schema = Backbone.Model.extend({
 
 	initialize: function(attrs) {
 		console.log("Schema.initialize " + attrs.name);
+		if (attrs.name.indexOf('$') > 0) {
+			this.set('account', attrs.name.split('$')[0]);
+			this.set('name', attrs.name.split('$')[1]);		
+		}
 
 		if ( ! attrs.tables) {
 			this.set('tables', new Donkeylift.Tables());
@@ -61,7 +65,7 @@ Donkeylift.Schema = Backbone.Model.extend({
 	},
 
 	url : function(params) {
-		var url = Donkeylift.app.account.url() + '/' + this.get('name');
+		var url = Donkeylift.env.server + '/' + this.get('account') + '/' + this.get('name');
 		if (params) {
 			var urlParams = _.map(params, function(v, k) { 
 				return k + '=' + encodeURI(v) 

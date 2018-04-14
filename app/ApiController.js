@@ -104,6 +104,7 @@ Controller.prototype.initRoutes = function(options) {
 	} else {
 		this.router.use(function(req, res, next) {
 			req.user = new User(User.NOBODY);
+			//req.user = new User('dkottow@golder.com');
 			next();
 		});
 	}
