@@ -85,13 +85,13 @@ function AppBase(params) {
 AppBase.prototype.start = function(params, cbAfter) {
 	var me = this;
 
-  if (params.d365_database) {
-    //me.schemas = null;
-    me.setSchema(params.d365_database, cbAfter);
-  } else {
-    me.listSchemas(cbAfter);    
-  }
-  
+  me.listSchemas(function() {
+    if (params.d365_database) {
+      me.setSchema(params.d365_database, cbAfter);
+    }else {
+      if (cbAfter) cbAfter();
+    }
+  });  
 }
 
 AppBase.prototype.masterRoot = function() {
@@ -101,7 +101,7 @@ AppBase.prototype.masterRoot = function() {
 
 /**** schema stuff ****/
 
-AppBase.prototype.listSchemas = function(userPrincipalName, cbAfter) {
+AppBase.prototype.listSchemas = function(cbAfter) {
   console.log('listSchemas...');
   var me = this;
 
@@ -164,7 +164,6 @@ AppBase.prototype.setSchema = function(name, opts, cbAfter) {
   var reload = opts.reload !== undefined ? opts.reload : loadRequired; 
 
 	var updateViewsFn = function() {
-		//always false if (me.tableListView) me.tableListView.remove();
 		me.tableListView = new Donkeylift.TableListView({
 			model: me.schema,
 			collection: me.schema.get('tables')
@@ -177,9 +176,11 @@ AppBase.prototype.setSchema = function(name, opts, cbAfter) {
 	}
 
 	if (reload) {
-		this.unsetSchema();
+    this.unsetSchema();
 		this.schema = this.createSchema(name); //impl in AppData / AppSchema
-    this.schema.fetch(function() {
+    this.schema.fetch(function(response) {
+      console.log(response);
+      me.user.set('principal', response.login.principal);
       updateViewsFn();
       if (cbAfter) cbAfter();
 		});

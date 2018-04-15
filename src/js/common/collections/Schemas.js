@@ -7,7 +7,7 @@ Donkeylift.Schemas = Backbone.Collection.extend({
 	// Reference to this collection's model.
 	model: Donkeylift.Schema,
 
-	initialize : function(schemas) {
+	initialize : function(attrs) {
 	},
 
 });

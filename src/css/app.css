@@ -61,7 +61,6 @@ body {
 
 #table-list {
 	padding-top: 10px;
-	overflow: hidden;
 } 
   
 #table-list span {
@@ -76,6 +75,10 @@ body {
 	border: 0;
 }
 
+#table-list-items {
+	overflow: hidden;	
+}
+
 .table-item {
 	padding: 7px 7px;
 }
@@ -85,7 +88,7 @@ body {
 }
 
 .navbar-header {
-	margin-left: -1em !important; 
+	/* margin-left: -1em !important; */
 	margin-right: 1em !important; 
 }
 

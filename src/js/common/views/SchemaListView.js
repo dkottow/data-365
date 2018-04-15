@@ -29,7 +29,7 @@ Donkeylift.SchemaListView = Backbone.View.extend({
 	},
 
 	renderSchemaList: function() {
-		var me = this;
+		var schemaCount = 0;
 		var accounts = this.collection.groupBy(function(schema) {
 			return schema.get('account');
 		});
@@ -50,10 +50,17 @@ Donkeylift.SchemaListView = Backbone.View.extend({
 					name: schema.get('name'), 
 					value : schema.fullName() 
 				}));
+				++schemaCount;	
 				console.log(schema.fullName());
 			}, this);
 
 		}, this);
+		if (schemaCount == 0) {
+			this.$el.closest('li').find('a').attr('data-toggle', '');
+			this.$el.closest('li').find('.caret').hide();
+			return;
+		}
+
 	},
 
 	renderCurrentSchemaName: function() {

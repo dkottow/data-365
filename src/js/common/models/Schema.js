@@ -85,7 +85,7 @@ Donkeylift.Schema = Backbone.Model.extend({
 				me.get('props').setKeyFuncs();
 				console.log("Schema.fetch OK");
 				me.get('props').fetch(function() {
-					cbAfter();
+					cbAfter(response);
 				});					
 			},
 			error: function(err) {
