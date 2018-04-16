@@ -1,8 +1,8 @@
 /*global Backbone, Donkeylift, $ */
 
-function AppSchema(opts) {
+function AppSchema(params) {
 	
-	Donkeylift.AppBase.call(this, opts);
+	Donkeylift.AppBase.call(this, params);
 
 	this.menuView = new Donkeylift.MenuSchemaView();
 	this.router = new Donkeylift.RouterSchema();
@@ -16,19 +16,13 @@ AppSchema.prototype.createTableView = function(table, params) {
 	return new Donkeylift.SchemaTableView({model: table});
 }
 
-AppSchema.prototype.createSchema = function(name) {
-	return new Donkeylift.Schema({name : name, id : name});
+AppSchema.prototype.createSchema = function(path) {
+	return new Donkeylift.Schema({path : path});
 }
 
 AppSchema.prototype.updateSchema = function(cbAfter) {
 	Donkeylift.app.schema.update(function() {
-		if (Donkeylift.app.table) {
-			//refresh stale reference to current table and re-render
-			var tableName = Donkeylift.app.table.get('name');
-			Donkeylift.app.setTable(
-				Donkeylift.app.schema.get('tables').getByName(tableName)
-			);
-		}
+		Donkeylift.app.resetTable();
 		if (cbAfter) cbAfter();
 	});
 }

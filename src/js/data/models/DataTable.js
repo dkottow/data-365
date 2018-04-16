@@ -186,7 +186,7 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 				var response = result.response;
 					//console.log('response from api');
 				//console.dir(response);
-
+/*
 				var fragment = 'data'
 							+ '/' + Donkeylift.app.schema.get('name')
 							+ '/' + me.get('name')
@@ -197,7 +197,13 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 					block: 100,
 					replace: true
 				});
-
+*/
+				var fragment = 'path=' + me.get('url') + '&' + q;
+				Donkeylift.app.router.updateNavigation(fragment, {
+					block: 100,
+					replace: true
+				});
+				
 				var data = {
 					data: response.rows,
 					recordsTotal: response.totalCount,

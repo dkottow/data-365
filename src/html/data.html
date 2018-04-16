@@ -59,16 +59,7 @@
 				};
 
 				Donkeylift.app = new Donkeylift.AppData(params); 
-
-				params.d365_database = Donkeylift.util.getParameterByName('d365_database');
-/*
-				var db = Donkeylift.util.getParameterByName('d365_database');
-				if (db && db.indexOf('$') > 0) {
-					params.account = db.split('$')[0];
-					params.database = db.split('$')[1];
-				}
-*/
-				Donkeylift.app.start(params);
+				Donkeylift.app.start();
 			});
 
 	</script>

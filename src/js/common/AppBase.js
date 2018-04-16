@@ -82,15 +82,26 @@ function AppBase(params) {
 
 }
 
-AppBase.prototype.start = function(params, cbAfter) {
+AppBase.prototype.start = function(cbAfter) {
 	var me = this;
-
+  console.log("AppBase.start... '" + window.location.href + "'");
   me.listSchemas(function() {
-    if (params.d365_database) {
-      me.setSchema(params.d365_database, cbAfter);
-    }else {
+    var path = Donkeylift.util.getParameterByName('path');
+    if ( ! path) {
       if (cbAfter) cbAfter();
+      return;
     }
+
+    me.setSchema(path, cbAfter);
+/*    
+    me.setSchema(path, function() {
+      if ( ! path.match(Donkeylift.Table.PathRE)) {
+        if (cbAfter) cbAfter();
+        return;          
+      }
+      me.setTable(path.match(Donkeylift.Table.PathRE)[1]);
+    });
+*/
   });  
 }
 
@@ -125,7 +136,9 @@ AppBase.prototype.listSchemas = function(cbAfter) {
       });
       me.navbarView.render();
       if (cbAfter) cbAfter();
+
     } catch(err) { console.log(err); }
+
   }).catch(function(result) {
     console.log("Error requesting " + url);
     var err = new Error(result.jqXHR.responseText);
@@ -143,16 +156,16 @@ AppBase.prototype.unsetSchema = function() {
   this.navbarView.render();
 }
 
-AppBase.prototype.createSchema = function(name) {
+AppBase.prototype.createSchema = function(path) {
 	//overwrite me
 }
 
 AppBase.prototype.resetSchema = function(opts, cbAfter) {
-	if (this.schema) this.setSchema(this.schema.get('name'), opts, cbAfter);
+	if (this.schema) this.setSchema(this.schema.get('path'), opts, cbAfter);
 }
 
-AppBase.prototype.setSchema = function(name, opts, cbAfter) {
-	console.log('AppBase.setSchema ' + name);
+AppBase.prototype.setSchema = function(path, opts, cbAfter) {
+	console.log('AppBase.setSchema ' + path);
 	var me = this;
 
   if (typeof arguments[arguments.length - 1] == 'function') {
@@ -160,7 +173,15 @@ AppBase.prototype.setSchema = function(name, opts, cbAfter) {
   }
   opts = typeof opts == 'object' ? opts : {};
   
-	var loadRequired = (! this.schema) || (this.schema.get('name') != name);
+  if ( ! path.match(Donkeylift.Schema.PathRE)) {
+    console.log("setSchema path error '" + path + "'");
+    if (cbAfter) cbAfter();
+    return;
+  }
+
+  path = path.match(Donkeylift.Schema.PathRE)[0];
+
+	var loadRequired = (! this.schema) || (this.schema.get('path') != path);
   var reload = opts.reload !== undefined ? opts.reload : loadRequired; 
 
 	var updateViewsFn = function() {
@@ -177,7 +198,7 @@ AppBase.prototype.setSchema = function(name, opts, cbAfter) {
 
 	if (reload) {
     this.unsetSchema();
-		this.schema = this.createSchema(name); //impl in AppData / AppSchema
+		this.schema = this.createSchema(path); //impl in AppData / AppSchema
     this.schema.fetch(function(response) {
       console.log(response);
       me.user.set('principal', response.login.principal);
@@ -202,7 +223,10 @@ AppBase.prototype.createTableView = function(table, params) {
 }
 
 AppBase.prototype.setTable = function(table, params) {
-	console.log('app.setTable ' + params);
+  if (_.isString(table)) {
+    table = this.schema.get('tables').getByName(table);
+  }
+  console.log('app.setTable ' + table.get('name'));
 
 	var $a = $("#table-list a[data-target='" + table.get('name') + "']");
 	$('#table-list a').removeClass('active');
@@ -220,7 +244,9 @@ AppBase.prototype.setTable = function(table, params) {
 }
 
 AppBase.prototype.resetTable = function() {
-	if (this.table) this.setTable(this.table);
+  if ( ! this.table) return; 
+  //refresh stale reference to current table and re-render
+  this.setTable(this.table.get('name'));
 }
 
 AppBase.prototype.unsetTable = function() {

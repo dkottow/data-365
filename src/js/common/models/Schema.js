@@ -3,10 +3,17 @@
 Donkeylift.Schema = Backbone.Model.extend({
 
 	initialize: function(attrs) {
-		console.log("Schema.initialize " + attrs.name);
-		if (attrs.name.indexOf('$') > 0) {
-			this.set('account', attrs.name.split('$')[0]);
-			this.set('name', attrs.name.split('$')[1]);		
+		console.log("Schema.initialize ", attrs);
+		if (attrs.path) {
+			var match = attrs.path.match(Donkeylift.Schema.PathRE);
+			if ( ! match) {
+				throw new Error('Schema path does not match');
+			}
+			this.set('account', match[1]);
+			this.set('name', match[2]);		
+
+		} else {
+			this.set('path', '/' + attrs.account + '/' + attrs.name);
 		}
 
 		if ( ! attrs.tables) {
@@ -204,7 +211,7 @@ return;
 		};
 
 		//set id to (new) name
-		this.set('id', this.get('name'));
+		this.set('id', this.get('path'));
 		console.log("Schema.save " + saveOptions.url);
 
 		Backbone.Model.prototype.save.call(this, null, saveOptions);
@@ -243,8 +250,6 @@ return;
 		return { table: table, field: field };
 	},
 
-	fullName: function() {
-		return this.get('account') + '$' + this.get('name');
-	}
-
 });
+
+Donkeylift.Schema.PathRE = /^\/(\w+)\/(\w+)/; // e.g. /test/sandwiches/customers.rows 

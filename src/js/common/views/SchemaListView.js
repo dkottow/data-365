@@ -48,10 +48,10 @@ Donkeylift.SchemaListView = Backbone.View.extend({
 			_.each(ownedSchemas, function(schema) {
 				this.$el.append(this.template({ 
 					name: schema.get('name'), 
-					value : schema.fullName() 
+					value : schema.get('path') 
 				}));
 				++schemaCount;	
-				console.log(schema.fullName());
+				console.log(schema.get('path'));
 			}, this);
 
 		}, this);

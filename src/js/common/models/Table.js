@@ -235,3 +235,5 @@ Donkeylift.Table.create = function(name) {
 
 Donkeylift.Table.NONEDITABLE_FIELDS = ['id', 'mod_by', 'mod_on', 'add_by', 'add_on'];
 Donkeylift.Table.INITHIDE_FIELDS = ['own_by', 'mod_by', 'mod_on', 'add_by', 'add_on'];
+
+Donkeylift.Table.PathRE = /^\/\w+\/\w+\/(\w+)/; // e.g. /test/sandwiches/customers.rows 

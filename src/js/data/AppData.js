@@ -16,9 +16,9 @@ AppData.prototype.constructor = AppData;
 
 /*** override AppBase methods ***/ 
 
-AppData.prototype.start = function(params, cbAfter) {
+AppData.prototype.start = function(cbAfter) {
 	console.log("AppData.start...");
-	AppBase.prototype.start.call(this, params, function() {
+	AppBase.prototype.start.call(this, function() {
 		//only data app
 		if (window.location.hash.length > 0) {
 			console.log("navigate " + window.location.hash);
@@ -36,8 +36,8 @@ AppData.prototype.createTableView = function(table, params) {
 	});
 }
 
-AppData.prototype.createSchema = function(name) {
-	return new Donkeylift.Database({name : name, id : name});
+AppData.prototype.createSchema = function(path) {
+	return new Donkeylift.Database({path : path});
 }
 
 	

@@ -11,23 +11,18 @@
 			, "table/:table/:filter": "routeGotoRows"
 			, "reset-filter": "routeResetFilter"
 			, "reload-table": "routeReloadTable"
-			, "data/:schema/:table(/*params)": "routeUrlTableData"
-			, "schema/:schema/:table": "routeUrlTableSchema"
+			, "path=:path(/*params)": "routeUrlTableData"
         },
 
-		routeUrlTableData: function(schemaName, tableName, paramStr) {
-			console.log("routeUrlTableData " 
-						+ schemaName + " " + tableName + " " + paramStr);
+		routeUrlTableData: function(path, paramStr) {
+			console.log("routeUrlTableData " + path + " " + paramStr);
 			/* 
 			 * hack to block executing router handlers twice in a row in FF
 			 * isBlocked.. will be timeout reset after a short time (100ms). 
 			*/
 			if (this.isBlockedGotoUrl) return;
-
-			this.gotoTable(tableName, { 
-				schema: schemaName,
-				params: this.parseParams(paramStr)
-			});
+			var table = path.match(Donkeylift.Table.PathRE)[1];
+			this.gotoTable(table, this.parseParams(paramStr));
 		},
 
 		routeGotoTable: function(tableName) {
@@ -66,14 +61,12 @@
 
 
 		gotoHash: function(hash, cbAfter) {
-			var parts = hash.split('/');
-			if (parts.length == 4 && parts[0] == '#data') {
-				
-				var opts = 	{ 
-						schema: parts[1],
-						params: this.parseParams(parts[3])
-				}; 
-				this.gotoTable(parts[2], opts, cbAfter);
+
+			var path = Donkeylift.util.getParameterByName('path', hash);
+			if (path && path.match(Donkeylift.Table.PathRE)) {
+				var params = this.parseParams(hash);	
+				this.gotoTable(path.match(Donkeylift.Table.PathRE)[1], params, cbAfter);				
+
 			} else {
 				cbAfter();
 			}
@@ -104,7 +97,7 @@
 				me.isBlockedGotoUrl = false;
 			}, ms);
 		},
-
+/*
 		updateNavigation: function(fragment, options) {
 			console.log('update nav ' + fragment + ' ' + options); 
 			options = options || {};
@@ -113,40 +106,33 @@
 			}
 			this.navigate(fragment, {replace: options.replace});
 		},	
-
-		gotoTable: function(tableName, options, cbAfter) {
+*/
+		updateNavigation: function(query, options) {
+			console.log('update nav', query, options); 
 			options = options || {};
+			if (options.block > 0) {
+				this.blockGotoUrl(options.block); //avoid inmediate reolad FF
+			}
+			this.navigate(query, {replace: options.replace});
+		},	
+		
+		gotoTable: function(tableName, params, cbAfter) {
 
-			var setOthers = function() {
-
-				var table = Donkeylift.app.schema.get('tables').find(function(t) { 
-					return t.get('name') == tableName; 
-				});			
-
-				if (options.params) {
-					//set filters
-					var filters = _.map(options.params.$filter, function(f) {
-						return Donkeylift.Filter.Create(f);
-					});
-					if (_.contains(filters, null)) {
-						console.log('error parsing $filter param. no filters added');
-					} else {
-						Donkeylift.app.setFilters(filters);
-					}
+			if (params) {
+				//set filters
+				var filters = _.map(params.$filter, function(f) {
+					return Donkeylift.Filter.Create(f);
+				});
+				if (_.contains(filters, null)) {
+					console.log('error parsing $filter param. no filters added');
+				} else {
+					Donkeylift.app.setFilters(filters);
 				}
-				
-				//load data			
-				Donkeylift.app.setTable(table, options.params);
-				if (cbAfter) cbAfter();
 			}
-
-			if (options.schema) {
-				Donkeylift.app.setSchema(options.schema, setOthers);
-
-			} else {
-				setOthers();
-			}
-
+			
+			//load data			
+			Donkeylift.app.setTable(tableName);
+			if (cbAfter) cbAfter();
 		}
 
         
