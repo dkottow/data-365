@@ -28,7 +28,9 @@
 		<div id="module" class="col-sm-13 module-def">
 			<div id="menu" class="row"></div>
 			<section id="content" class="row">
-<!--				<small>Demo account login: demo@donkeylift.com | demo</small> -->
+				<div class="database-list-info">
+					<i>Complete list of databases. More information on Data365 <a href="https://golderassociates.sharepoint.com/sites/13017g">here</a></i>
+				</div>
 			</section>
 		</div>
 
@@ -53,12 +55,7 @@
 
 	<script type="text/javascript"> 
 			$(function() { 
-
-				var params = {
-					server: '/api'
-				};
-
-				Donkeylift.app = new Donkeylift.AppData(params); 
+				Donkeylift.app = new Donkeylift.AppData({ server: '/api' }); 
 				Donkeylift.app.start();
 			});
 

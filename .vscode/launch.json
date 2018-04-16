@@ -10,7 +10,8 @@
             "name": "Node Localhost",
             "program": "${workspaceFolder}\\server.js",
             "env": {
-                "DL_MSSQL_PASSWORD": "sa"
+                "NODE_ENV": "default",
+                "DL_MSSQL_PASSWORD": ""
             }
         }
 

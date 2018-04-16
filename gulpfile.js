@@ -48,7 +48,7 @@ var outputs = {
 
 var tasks = [
     'build-data-html',
-    //'build-schema-html',
+    'build-schema-html',
     //'build-api-html',
 	
 	'build-d365-data-js',
@@ -111,7 +111,7 @@ gulp.task('build-data-html', function () {
 		.pipe(gulp.dest(outputs.PAGES_DIR));
 });
 
-gulp.task('build-SchemaEditor-aspx', function () {
+gulp.task('build-schema-html', function () {
     var snippets = {
         dialogs: [
 			inputs.SRC_DIR + 'html/common/dialogs/*.html', 
@@ -123,7 +123,14 @@ gulp.task('build-SchemaEditor-aspx', function () {
 		]
     };
 
-    return gulp.src([ inputs.SRC_DIR + 'aspx/SchemaEditor.aspx' ])
+    return gulp.src([ inputs.SRC_DIR + 'html/schema.html' ])
+
+		.pipe(inject(gulp.src('./src/html/common/nav.html'), {
+			starttag: '<!-- inject:nav:{{ext}} -->',
+			transform: function (filePath, file) {
+			return file.contents.toString('utf8')
+			}
+		}))
 
 		.pipe(inject(gulp.src(snippets.dialogs), {
 		    starttag: '<!-- inject:dialogs:{{ext}} -->',
@@ -139,10 +146,9 @@ gulp.task('build-SchemaEditor-aspx', function () {
 		    }
 		}))
 
-		.pipe(replace("$DATA365_SITEASSETS_DIR", process.env.DATA365_SITEASSETS_DIR))	
-
-		.pipe(gulp.dest(outputs.ASPX_DIR));
+		.pipe(gulp.dest(outputs.PAGES_DIR));
 });
+
 
 gulp.task('build-WebApi-aspx', function () {
 

@@ -83,25 +83,17 @@ function AppBase(params) {
 }
 
 AppBase.prototype.start = function(cbAfter) {
-	var me = this;
   console.log("AppBase.start... '" + window.location.href + "'");
-  me.listSchemas(function() {
-    var path = Donkeylift.util.getParameterByName('path');
-    if ( ! path) {
-      if (cbAfter) cbAfter();
-      return;
-    }
+  var me = this;
+  var path = Donkeylift.util.getParameterByName('path');
 
-    me.setSchema(path, cbAfter);
-/*    
-    me.setSchema(path, function() {
-      if ( ! path.match(Donkeylift.Table.PathRE)) {
-        if (cbAfter) cbAfter();
-        return;          
-      }
-      me.setTable(path.match(Donkeylift.Table.PathRE)[1]);
-    });
-*/
+  me.getSchemaList(function() {
+    if (path) {
+      me.setSchema(path, cbAfter);
+    } else {
+      me.showSchemaList();
+      if (cbAfter) cbAfter();
+    }
   });  
 }
 
@@ -112,7 +104,7 @@ AppBase.prototype.masterRoot = function() {
 
 /**** schema stuff ****/
 
-AppBase.prototype.listSchemas = function(cbAfter) {
+AppBase.prototype.getSchemaList = function(cbAfter) {
   console.log('listSchemas...');
   var me = this;
 
@@ -215,6 +207,10 @@ AppBase.prototype.setSchema = function(path, opts, cbAfter) {
 		if (cbAfter) cbAfter();
 	}
 }
+
+AppBase.prototype.showSchemaList = function() {
+  this.navbarView.schemaListView.renderAllInfo();
+},
 
 /*** table stuff ****/
 

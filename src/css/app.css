@@ -54,10 +54,16 @@ body {
 	margin-top: -15px;
 }
 
+.database-list-info {
+	margin: 1em;
+}
+
 .database-info, .user-info {
 	color: black;
 	font-weight: bold;	
 }
+
+
 
 #table-list {
 	padding-top: 10px;
@@ -89,7 +95,7 @@ body {
 
 .navbar-header {
 	/* margin-left: -1em !important; */
-	margin-right: 1em !important; 
+	/* margin-right: 1em !important; */
 }
 
 .navbar-image {
@@ -105,6 +111,12 @@ body {
 #toggle-sidebar {
 }
 
+#d365-label {
+	font-weight: bold;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	color: #00833e;
+}
 
 .fa {
 	display: inline;
@@ -145,6 +157,25 @@ body {
 	margin-right: 2em;
 }
 
+.content-account-header {
+	color: grey;
+	font-weight: bold;
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	padding: 5px 15px;
+}
+
+.dl-horizontal {
+	margin-bottom: 0;
+}
+
+.dl-horizontal dt {
+	width: 4em;
+}
+
+.dl-horizontal dd {
+	margin-left: 5em;
+}
 
 /* line 94, /Users/jonasvonandrian/jquery-sortable/source/css/application.css.sass */
 .sortable-table tr {

@@ -1,36 +1,37 @@
 <!doctype html>
 <html>
   <head>
-        <title>DonkeyLift</title>
-		<link href="/public/css/dl_3rdparty.css" rel="stylesheet" type="text/css" />
-        <link href="/public/css/dl_common.css" rel="stylesheet" type="text/css" />
+        <title>Data365</title>
+		<link href="/css/dl_3rdparty.css" rel="stylesheet" type="text/css" />
+        <link href="/css/dl_common.css" rel="stylesheet" type="text/css" />
+
 		<style>
 		</style>
-
-		<!-- Auth0. Setting the right viewport -->
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <!-- inject:google_analytics:html -->
 <!-- endinject -->
   </head>
 
   <body>
-<div id="wrapper" class="container-fluid">	
 
 <!-- inject:nav:html -->
 <!-- endinject -->
 
+<div id="wrapper" class="container-fluid">	
 	<div id="main" class="row">
 
 <!-- Sidebar -->
-		<div id="sidebar" class="col-sm-3 sidebar">
+		<div id="sidebar" class="col-sm-3 sidebar-def">
 		</div>        
 
  <!-- Dynamic Content -->
-		<div id="module" class="col-sm-13">
-    			<div id="user-info" class="row user-info"></div>
+		<div id="module" class="col-sm-13 module-def">
 			<div id="menu" class="row"></div>
-			<section id="content" class="row"></section>
+			<section id="content" class="row">
+				<div class="database-list-info">
+					<i>Complete list of databases. More information on Data365 <a href="https://golderassociates.sharepoint.com/sites/13017g">here</a></i>
+				</div>
+			</section>
 		</div>		
 
 	</div><!-- main -->
@@ -40,7 +41,7 @@
 <!-- end FIXED PAGE ELEMENTS --> 
 
 	<div id="ajax-progress-spinner">
-		<img src="/public/images/progress-spinner.gif"></img>
+		<img src="/img/progress-spinner.gif"></img>
 	</div>	
 
 <!-- inject:dialogs:html -->
@@ -51,12 +52,10 @@
 
 	<script src="js/dl_3rdparty.js" type="text/javascript"></script>
 	<script src="js/dl_schema.js" type="text/javascript"></script>
-	<!-- Auth0 lock script -->
-	<script src="//cdn.auth0.com/js/lock-9.1.min.js"></script>
 
 	<script type="text/javascript"> 
 			$(function() { 
-				Donkeylift.app = new Donkeylift.AppSchema(); 
+				Donkeylift.app = new Donkeylift.AppSchema({ server: '/api' }); 
 				Donkeylift.app.start(); 
 			});
 	</script>

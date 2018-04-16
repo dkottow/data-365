@@ -16,19 +16,43 @@ Donkeylift.SchemaListView = Backbone.View.extend({
 	el: '#selectDatabase',
 
 	template: _.template($('#nav-schema-template').html()),
+	contentAccountTemplate: _.template($('#content-account-template').html()),
+	contentSchemaTemplate: _.template($('#content-schema-template').html()),
 
 	render: function() {
 
 		this.$el.empty();
-		this.renderSchemaList();
-		this.renderCurrentSchemaName();
+		this._renderSchemaSelection();
+		this._renderCurrentSchemaName();
 
 		this.delegateEvents();
 
 		return this;
 	},
 
-	renderSchemaList: function() {
+	renderAllInfo: function() {
+		var $el = $('#content');
+		var accounts = this.collection.groupBy(function(schema) {
+			return schema.get('account');
+		});
+		_.each(accounts, function(schemas, account) {
+			$('#content').append(this.contentAccountTemplate({ name: account }));
+			_.each(schemas, function(schema) {
+				var href = window.location.href + '?' 
+					+ 'path=' + schema.get('path');
+
+				var html = this.contentSchemaTemplate({ 
+					href: href,
+					name: schema.get('name'),
+					description: "",
+					owners: schema.get('dbOwners').join(', ') 
+				});
+				$('#content > div:last').append(html);
+			}, this);
+		}, this);				
+	},
+
+	_renderSchemaSelection: function() {
 		var schemaCount = 0;
 		var accounts = this.collection.groupBy(function(schema) {
 			return schema.get('account');
@@ -63,7 +87,7 @@ Donkeylift.SchemaListView = Backbone.View.extend({
 
 	},
 
-	renderCurrentSchemaName: function() {
+	_renderCurrentSchemaName: function() {
 		var $span = this.$el.closest('li').find('a:first span');
 		if (Donkeylift.app.schema) {
 			$span.html(' ' + Donkeylift.app.schema.get('name') + ' ');
