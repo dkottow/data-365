@@ -207,35 +207,18 @@ Database.prototype.rowsOwned = function(tableName, rowIds, principal, cbResult) 
 
 Database.prototype.getInsertFields = function(rows, table) {
 
-	var row = rows[0]; //all based on first row
-
-	var rejectFields = _.pluck(_.filter(Table.MANDATORY_FIELDS, function(mf) { 
-		if (mf.name == 'id' && ! _.isNumber(row.id)) return true;
-		return false; 
-	}), 'name');
-
-	var forceFields = _.pluck(_.filter(Table.MANDATORY_FIELDS, function(mf) { 
-		return _.contains(['add_by', 'add_on', 'mod_by', 'mod_on', 'own_by'], mf.name); 
-	}), 'name');
-
-	var fields = _.filter(table.fields(), function(field) {
-		if (_.contains(rejectFields, field.name)) {
-			//never insert these fields, even if present in row
-			return false; 
-		}
-		if (_.contains(forceFields, field.name)) {
-			//always insert these fields, regardless of present in row
-			return true;
-		}
-		if (row[field.name] !== undefined) {
-			//insert if present row
-			return true;
-		}
-		
-		return false;
+	var noId = _.find(rows, function(row) {
+		return ! _.isNumber(row.id);
 	});
 
-	return _.object(_.pluck(fields, 'name'), fields);
+	var fields = table.fields();
+	if (noId) {
+		fields = _.reject(fields, function(field) {
+			return field.name == 'id';
+		});
+	}
+
+	return _.object(_.pluck(fields, 'name'), fields);	
 }
 
 Database.prototype.getUpdateFields = function(rows, table) {
