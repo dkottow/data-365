@@ -34,6 +34,8 @@ var User = require('./User.js').User;
 var log = require('./log.js').log;
 var funcs = require('./funcs.js');
 
+var AccountManager = require('./AccountManagerFactory.js').AccountManagerFactory;
+
 function Controller(accountManager, options) {
 	options = options || {};
 	this.auth = options.auth || false;
@@ -114,6 +116,10 @@ Controller.prototype.initRoutes = function(options) {
 		me.listAccounts(req, res);
 	});
 
+	this.router.get('/reset.do', function(req, res) {
+		me.resetAccounts(req, res);
+	});
+	
 	this.router.put(/^\/(\w+)$/, function(req, res) {
 		me.putAccount(req, res);
 	});
@@ -212,6 +218,37 @@ Controller.prototype.listAccounts = function(req, res) {
 		res.send(result);
 		log.info({req: req}, '...Controller.listAccounts()');
 
+	}).catch(err => {
+		me.sendError(req, res, err);
+		return;
+	});
+}
+
+Controller.prototype.resetAccounts = function(req, res) {
+	log.info({req: req}, 'Controller.resetAccounts()...');
+
+	var me = this;
+	this.access.authorize('resetAccounts', req, null).then((access) => { 
+
+		var result = {};
+	    var newMgr = AccountManager.create(me.accountManager.config);
+	    newMgr.init(function(err) {
+	        if (err) {
+				me.sendError(req, res, err, 400);
+				return;
+	        }
+	        me.accountManager = newMgr;
+
+			var result = {
+				message: 'Reloaded all databases.'
+			};
+			result.login = me.getLoginInfo(req);
+
+			log.trace(result);
+			res.send(result); 
+			log.info({req: req}, '...Controller.resetAccounts().');
+	    });
+							
 	}).catch(err => {
 		me.sendError(req, res, err);
 		return;
