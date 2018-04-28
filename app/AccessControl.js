@@ -95,7 +95,10 @@ if (req.user.name() == User.NOBODY) {
 
 		if (isAdmin) {
 			return Promise.resolve(true);
-			
+	
+		} else if (op == 'resetAccounts') {	
+			return Promise.resolve(true);
+
 		} else if (! path.db) {
 			return rejectFn(util.format("Action '%s' requires admin access.", op));
 
