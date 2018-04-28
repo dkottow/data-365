@@ -38,7 +38,8 @@ Donkeylift.SchemaListView = Backbone.View.extend({
 		_.each(accounts, function(schemas, account) {
 			$('#content').append(this.contentAccountTemplate({ name: account }));
 			_.each(schemas, function(schema) {
-				var href = window.location.href + '?' 
+				let url = window.location.href.substr(0, window.location.href.length-1);
+				var href = url + '?' 
 					+ 'path=' + schema.get('path');
 
 				var html = this.contentSchemaTemplate({ 
@@ -58,18 +59,15 @@ Donkeylift.SchemaListView = Backbone.View.extend({
 			return schema.get('account');
 		});
 		_.each(accounts, function(schemas, account) {
-			var ownedSchemas = _.filter(schemas, function(schema) {
-				return schema.get('isAdmin');
-			});
 
-			if (ownedSchemas.length > 0) {
+			if (schemas.length > 0) {
 				this.$el.append(
 					$('<li>' + account + '</li>')
 						.attr('class', 'dropdown-header')					
 				);
 			}
 
-			_.each(ownedSchemas, function(schema) {
+			_.each(schemas, function(schema) {
 				this.$el.append(this.template({ 
 					name: schema.get('name'), 
 					value : schema.get('path') 

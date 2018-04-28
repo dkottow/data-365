@@ -73,6 +73,10 @@ function AppBase(params) {
 		me.toggleSidebar();
 	}); 
 
+  $('#renderSchemaList').click(function() {
+		me.renderSchemaList();
+	}); 
+
 	Backbone.history.start();
 
   //overwrite Backbone.ajax with Donkeylift.ajax 
@@ -87,11 +91,10 @@ AppBase.prototype.start = function(cbAfter) {
   var me = this;
   var path = Donkeylift.util.getParameterByName('path');
 
-  me.getSchemaList(function() {
+  me.getSchemas(function() {
     if (path) {
       me.setSchema(path, cbAfter);
     } else {
-      me.showSchemaList();
       if (cbAfter) cbAfter();
     }
   });  
@@ -102,24 +105,36 @@ AppBase.prototype.masterRoot = function() {
   return Donkeylift.env.server + '/_d365/_d365Master';
 }
 
+
 /**** schema stuff ****/
 
-AppBase.prototype.getSchemaList = function(cbAfter) {
-  console.log('listSchemas...');
+AppBase.prototype.getSchemas = function(cbAfter) {
+  console.log('getSchemas...');
   var me = this;
 
-  var query = "";
-  //query += "&$filter=UserPrincipalName eq '" + userPrincipalName + "'";
-
-  var url = this.masterRoot() + '/_d365AdminDatabases.view' + '?' + query;
+  let url = Donkeylift.env.server;
   Donkeylift.ajax(url, {
 
   }).then(function(result) {
+
+    let response = result.response;
+    me.user = new Donkeylift.User(response.login);
+
+    //debug
+    me.user = new Donkeylift.User({
+      user: "dkottow@golder.com",
+      principal: "admin"
+    });
+
+    let query = "$filter=UserPrincipalName eq '" + me.user.upn() + "'";
+    let url = me.masterRoot() + '/_d365AdminDatabases.view' + '?' + query;
+    return Donkeylift.ajax(url);
+
+  }).then(function(result) {
     try {
-      var response = result.response;
-      console.log(response);
-      me.user = new Donkeylift.User(response.login);
-      me.schemas = Donkeylift.Schemas.Create(response.rows, { user: me.user.upn() });
+
+      let response = result.response;
+      me.schemas = Donkeylift.Schemas.Create(response.rows);      
       me.navbarView = new Donkeylift.NavbarView({ 
         model: {
           schemas: me.schemas,
@@ -128,16 +143,14 @@ AppBase.prototype.getSchemaList = function(cbAfter) {
       });
       me.navbarView.render();
       if (cbAfter) cbAfter();
-
     } catch(err) { console.log(err); }
-
+    
   }).catch(function(result) {
     console.log("Error requesting " + url);
     var err = new Error(result.jqXHR.responseText);
     console.log(err);
     alert(err.message);
   });         
-  
 }
 
 AppBase.prototype.unsetSchema = function() {
@@ -208,8 +221,33 @@ AppBase.prototype.setSchema = function(path, opts, cbAfter) {
 	}
 }
 
-AppBase.prototype.showSchemaList = function() {
-  this.navbarView.schemaListView.renderAllInfo();
+AppBase.prototype.renderSchemaList = function() {
+
+  console.log('renderSchemaList...');
+  var me = this;
+
+  var query = "$select=Account,Database,UserPrincipalName,Scope"
+           + "&$filter=Scope eq 'Database'";
+
+  var url = this.masterRoot() + '/_d365AdminDatabases.view' + '?' + query;
+  Donkeylift.ajax(url, {
+
+  }).then(function(result) {
+    try {
+      var response = result.response;
+      console.log(response);
+      var allSchemas = Donkeylift.Schemas.Create(response.rows);
+      var schemaListView = new Donkeylift.SchemaListView({ collection: allSchemas });
+      schemaListView.renderAllInfo();
+
+    } catch(err) { console.log(err); }
+
+  }).catch(function(result) {
+    console.log("Error requesting " + url);
+    var err = new Error(result.jqXHR.responseText);
+    console.log(err);
+    alert(err.message);
+  });         
 },
 
 /*** table stuff ****/
