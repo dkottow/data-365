@@ -38,16 +38,16 @@ var AccountManager = require('./AccountManagerFactory.js').AccountManagerFactory
 
 function Controller(accountManager, options) {
 	options = options || {};
-	this.auth = options.auth || false;
 	this.accountManager = accountManager;
 	this.router = new express.Router();
-	this.access = new AccessControl({ auth: this.auth });
+	this.access = new AccessControl(options);
 	this.initRoutes(options);
 }
 
 Controller.prototype.initRoutes = function(options) {
 	log.trace("Controller.initRoutes()...");		
 	var me = this;
+	options = options || {};
 
 	var reqSizeLimit = options.bodyParser ? options.bodyParser.limit : '1mb';
 
@@ -56,7 +56,7 @@ Controller.prototype.initRoutes = function(options) {
 	//urlencoded parsing (used by POST requests to add/mod/del rows)
 	this.router.use(bodyParser.urlencoded({ limit: reqSizeLimit, extended: true }));
 
-	if (this.auth) {
+	if (options.auth) {
 
 		var isNonceRoute = function(path) {
 			var result = _.find(_.values(Controller.NonceRoutes), function(regExp) {
@@ -93,11 +93,6 @@ Controller.prototype.initRoutes = function(options) {
 					req.user = new User(result.upn, me.accountManager.masterDatabase());
 					next();
 				});
-
-			} else {
-				//for testing, we supply user on query string ?user=dkottow@golder.com
-				log.error('Authorization token missing');
-				me.sendError(req, res, new Error("Authorization token missing"), 401);
 				return;
 			}
 
@@ -105,8 +100,7 @@ Controller.prototype.initRoutes = function(options) {
 
 	} else {
 		this.router.use(function(req, res, next) {
-			req.user = new User(User.NOBODY);
-			//req.user = new User('dkottow@golder.com');
+			req.user = new User(req.query.user || User.NOBODY, me.accountManager.masterDatabase());	
 			next();
 		});
 	}
