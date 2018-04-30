@@ -48,7 +48,7 @@ var outputs = {
 	PAGES_DIR: './public/'
 }
 
-var uiTasks = [
+var install_tasks = [
     'build-data-html',
     'build-schema-html',
     //'build-api-html',
@@ -71,7 +71,7 @@ var uiTasks = [
 	'copy-fonts'
 ];
 
-var appTasks = [
+var publish_tasks = [
 	'inject-gitrev'
 ];
 
@@ -81,14 +81,18 @@ gulp.task('inject-gitrev', function() {
 			console.log(err);
 			return;
 		}
-		
+
 		return gulp.src([ './etc/swagger.json' ])
 		.pipe(replace("$GIT_REVISION", rev))
 		.pipe(gulp.dest(outputs.CONTENT_DIR));		
 	});
 });
 
-gulp.task('default', uiTasks.concat(appTasks), function () {
+gulp.task('default', install_tasks, function () {
+    // place code for your default task here
+});
+
+gulp.task('publish', publish_tasks, function () {
     // place code for your default task here
 });
 
