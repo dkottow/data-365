@@ -121,10 +121,12 @@ AppBase.prototype.getSchemas = function(cbAfter) {
     me.user = new Donkeylift.User(response.login);
 
     //debug
+    /*
     me.user = new Donkeylift.User({
       user: "dkottow@golder.com",
       principal: "admin"
     });
+*/
 
     let query = "$filter=UserPrincipalName eq '" + me.user.upn() + "'";
     let url = me.masterRoot() + '/_d365AdminDatabases.view' + '?' + query;
