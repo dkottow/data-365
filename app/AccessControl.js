@@ -94,16 +94,21 @@ if (req.user.name() == User.NOBODY) {
 //return new Promise(function(resolve, reject) { reject(new Error('this error does not work')); });
 
 		if (isAdmin) {
-			return Promise.resolve(true);
-	
-		} else if (op == 'resetAccounts') {	
-			return Promise.resolve(true);
+			return resolveFn(true, 'user is admin');
+		}
 
-		} else if (! path.db) {
-			return rejectFn(util.format("Action '%s' requires admin access.", op));
+		switch(op) {
 
-		} else {
-			return req.user.access(path.db, scope);
+			case 'listAccounts':			
+			case 'resetAccounts':			
+			case 'getAccount':	
+				return resolveFn(true, 'op requires no priviliges');
+
+			case 'putAccount':	
+				return rejectFn(util.format("Action '%s' requires admin access.", op));
+
+			default:
+				return req.user.access(path.db, scope);
 		}
 		
 	}).then((access) => {

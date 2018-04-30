@@ -116,7 +116,7 @@ Controller.prototype.initRoutes = function(options) {
 		me.listAccounts(req, res);
 	});
 
-	this.router.get('/reset.do', function(req, res) {
+	this.router.post('/reset.do', function(req, res) {
 		me.resetAccounts(req, res);
 	});
 	
