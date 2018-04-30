@@ -33,6 +33,7 @@
     , "gulp-markdown": "*"
     , "gulp-insert": "*"
     , "gulp-rename": "*"
+    , "gulp-git": "*"
   }
   , "devDependencies": {
     "mocha": "*"

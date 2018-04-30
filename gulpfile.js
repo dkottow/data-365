@@ -14,6 +14,8 @@ var util = require('util');
 
 var config = require('config');
 
+var git = require('gulp-git');
+
 var inputs = {
     SRC_DIR: './src/',
     SRC_3RDPARTY_DIR: './src/3rdparty/',
@@ -46,7 +48,7 @@ var outputs = {
 	PAGES_DIR: './public/'
 }
 
-var tasks = [
+var uiTasks = [
     'build-data-html',
     'build-schema-html',
     //'build-api-html',
@@ -69,7 +71,24 @@ var tasks = [
 	'copy-fonts'
 ];
 
-gulp.task('default', tasks, function () {
+var appTasks = [
+	'inject-gitrev'
+];
+
+gulp.task('inject-gitrev', function() {
+	git.revParse({ args: 'HEAD' }, function(err, rev) {
+		if (err) {
+			console.log(err);
+			return;
+		}
+		
+		return gulp.src([ './etc/swagger.json' ])
+		.pipe(replace("$GIT_REVISION", rev))
+		.pipe(gulp.dest(outputs.CONTENT_DIR));		
+	});
+});
+
+gulp.task('default', uiTasks.concat(appTasks), function () {
     // place code for your default task here
 });
 

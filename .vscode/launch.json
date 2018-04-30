@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}\\server.js",
             "env": {
                 "NODE_ENV": "localhost-office",
-                "DL_MSSQL_PASSWORD": ""
+                "DL_MSSQL_PASSWORD": "G0lderPass.83"
             }
         }
 

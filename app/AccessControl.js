@@ -36,7 +36,7 @@ function AccessControl(options) {
 }
 
 AccessControl.prototype.auth = function(user) {
-	if (user && req.user.name() == User.NOBODY) return false;
+	if (user && user.name() == User.NOBODY) return false;
 	return true;
 }
 

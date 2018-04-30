@@ -25,7 +25,7 @@ log.info({ mem: funcs.memInfo() }, 'memory reset');
 
 var app = require('./app/app.js').app;
 
-app.init({ auth: config.auth }, function(err) {
+app.init(function(err) {
 
 	if (err) throw err;
 

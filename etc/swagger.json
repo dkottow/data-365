@@ -3,7 +3,8 @@
     "info": {
         "title": "Data365 API",
         "description": "A web API to manage SQL databases.",
-        "version": "1.0.0-alpha"
+        "version": "1.0.0-alpha",
+        "git-revision": "$GIT_REVISION"
     },
     "host": "localhost:3000",
     "schemes": [
