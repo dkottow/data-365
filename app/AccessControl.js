@@ -32,7 +32,12 @@ if ( ! path.isAbsolute(tempDir)) tempDir = path.join(process.cwd(), tempDir);
 
 function AccessControl(options) {
 	options = options || {};
-	this.auth = options.auth || false;
+	//this.auth = options.auth || false; 
+}
+
+AccessControl.prototype.auth = function(user) {
+	if (user && req.user.name() == User.NOBODY) return false;
+	return true;
 }
 
 AccessControl.prototype.authorize = function(op, req, path) {
@@ -50,8 +55,7 @@ AccessControl.prototype.authorize = function(op, req, path) {
 		return Promise.reject(err);
 	}
 	
-	//auth disabled
-	if ( ! this.auth) {
+	if ( ! this.auth(req.user)) {
 		return resolveFn(true, 'auth disabled');
 	}
 
@@ -71,14 +75,6 @@ AccessControl.prototype.authorize = function(op, req, path) {
 		return rejectFn(util.format("Action '%s' requires authenticated user", op));
 	}
 
-//remove me after pilot	
-/*
-if (req.user.name() == User.NOBODY) {
-	log.debug('AccessControl.authorize() temporary passthrough'); 
-	return resolveFn(true, 'User.NOBODY enabled temporary');
-}
-*/
-
 	path = path || {};
 	var scope = {
 		account: path.account ? path.account.name : null,
@@ -89,9 +85,6 @@ if (req.user.name() == User.NOBODY) {
 	log.debug({scope: scope}, 'AccessControl.authorize()')
 
 	return req.user.isAdmin(scope).then((isAdmin) => {
-
-//return Promise.reject(new Error('this error does not work'));
-//return new Promise(function(resolve, reject) { reject(new Error('this error does not work')); });
 
 		if (isAdmin) {
 			return resolveFn(true, 'user is admin');
@@ -203,13 +196,7 @@ AccessControl.prototype.filterQuery = function(path, query, user) {
 		principal: user.principal() 
 	}, 'AccessControl.filterQuery()...'); 
 
-	if ( ! this.auth) return Promise.resolve(query.filter);
-
-//TODO remove me after pilot	
-if (user.name() == User.NOBODY) {
-	log.debug('AccessControl.filterQuery() temporary passthrough'); 
-	return Promise.resolve(query.filter);
-}
+	if ( ! this.auth(user)) return Promise.resolve(query.filter);
 
 	var scope = { account: path.account.name, database: path.db.name() };
 	return user.isAdmin(scope).then((isAdmin) => {

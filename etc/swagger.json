@@ -33,6 +33,26 @@
         }
     ],
     "paths": {
+        "/reset.do": {
+            "post": {
+                "summary": "Reset database connections",
+                "description": "Drop all connections to sql server and reload all database definitions.",
+                "tags": [
+                    "system"
+                ],
+                "responses": {
+                    "200": {
+                        "description": "returns account object"
+                    },
+                    "default": {
+                        "description": "Unexpected error",
+                        "schema": {
+                            "$ref": "#/definitions/Error"
+                        }
+                    }
+                }
+            }
+        },
         "/{account}": {
             "get": {
                 "summary": "Get Account",
