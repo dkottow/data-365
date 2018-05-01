@@ -35,8 +35,8 @@ function AccessControl(options) {
 	//this.auth = options.auth || false; 
 }
 
-AccessControl.prototype.auth = function(req) {
-	if (req.user && req.user.name() == User.NOBODY) return false;
+AccessControl.prototype.auth = function(user) {
+	if (user && user.name() == User.NOBODY) return false;
 	return true;
 }
 
@@ -55,7 +55,7 @@ AccessControl.prototype.authorize = function(op, req, path) {
 		return Promise.reject(err);
 	}
 	
-	if ( ! this.auth(req)) {
+	if ( ! this.auth(req.user)) {
 		return resolveFn(true, 'auth disabled');
 	}
 
@@ -196,7 +196,7 @@ AccessControl.prototype.filterQuery = function(path, query, user) {
 		principal: user.principal() 
 	}, 'AccessControl.filterQuery()...'); 
 
-	if ( ! this.auth(req)) return Promise.resolve(query.filter);
+	if ( ! this.auth(user)) return Promise.resolve(query.filter);
 
 //TODO remove me after pilot	
 if (user.name() == User.NOBODY) {

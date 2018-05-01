@@ -19,10 +19,11 @@ var util = require('util');
 var url = require('url');
 var express = require('express');
 var bodyParser = require('body-parser');
-var config = require('config');
-
 //var jwt = require('express-jwt'); //Auth0
 var jwt = require('azure-ad-jwt');	//AAD
+var config = require('config');
+
+var pkgjson = require('../package.json');
 
 var parser = require('./QueryParser.js');
 var AccessControl = require('./AccessControl.js').AccessControl;
@@ -208,6 +209,7 @@ Controller.prototype.listAccounts = function(req, res) {
 		});
 	
 		result.login = me.getLoginInfo(req);
+		result.version = pkgjson.version;
 
 		res.send(result);
 		log.info({req: req}, '...Controller.listAccounts()');
