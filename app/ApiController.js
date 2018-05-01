@@ -25,6 +25,9 @@ var config = require('config');
 
 var pkgjson = require('../package.json');
 
+var fs = require('fs');
+var path = require('path');
+
 var parser = require('./QueryParser.js');
 var AccessControl = require('./AccessControl.js').AccessControl;
 var Schema = require('./Schema.js').Schema;
@@ -38,17 +41,25 @@ var funcs = require('./funcs.js');
 var AccountManager = require('./AccountManagerFactory.js').AccountManagerFactory;
 
 function Controller(accountManager, options) {
-	options = options || {};
+	this.options = options || {};
 	this.accountManager = accountManager;
 	this.router = new express.Router();
 	this.access = new AccessControl(options);
-	this.initRoutes(options);
 }
 
-Controller.prototype.initRoutes = function(options) {
+Controller.prototype.init = function(cbAfter) {
+	log.debug("Controller.init()...");		
+
+	this._initRoutes();
+	cbAfter();
+
+	log.debug("...Controller.init().");		
+}
+
+Controller.prototype._initRoutes = function() {
 	log.trace("Controller.initRoutes()...");		
 	var me = this;
-	options = options || {};
+	var options = this.options;
 
 	var reqSizeLimit = options.bodyParser ? options.bodyParser.limit : '1mb';
 
@@ -1044,11 +1055,16 @@ Controller.prototype.account = function(name) {
 	return this.accountManager.get(name);
 }
 
+Controller.prototype.version = function() {
+	return this._version;
+}
+
 Controller.prototype.getLoginInfo = function(req) {
 	return {
 		user: req.user.name(),
 		principal: req.user.principal(),
-		timestamp: Field.dateToString(new Date())
+		timestamp: Field.dateToString(new Date()),
+		gitrev: this.version()
 	}
 }
 

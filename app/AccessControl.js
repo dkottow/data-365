@@ -198,12 +198,6 @@ AccessControl.prototype.filterQuery = function(path, query, user) {
 
 	if ( ! this.auth(user)) return Promise.resolve(query.filter);
 
-//TODO remove me after pilot	
-if (user.name() == User.NOBODY) {
-	log.debug('AccessControl.filterQuery() temporary passthrough'); 
-	return Promise.resolve(query.filter);
-}
-
 	var scope = { account: path.account.name, database: path.db.name() };
 	return user.isAdmin(scope).then((isAdmin) => {
 

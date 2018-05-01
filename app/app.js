@@ -16,7 +16,6 @@
 
 var util = require('util');
 var url = require('url');
-var path = require('path');
 
 var _ = require('underscore');
 
@@ -45,23 +44,22 @@ if (config.sql.engine == 'sqlite') {
 
 accountConfig.accounts = config.accounts;
 
-app.init = function(options, cbAfter) {
+app.init = function(cbAfter) {
 	log.info({config: accountConfig}, 'app.init()...');
 
 	accounts = AccountManager.create(accountConfig);
-
+	controller = new ApiController(accounts, { auth: config.auth });
+	
 	accounts.init(function(err) {
-		if (err) {
-			cbAfter(err);
-			return;
-		}
-		initRoutes(options);
-		log.info('...app.init()');
-		cbAfter();
+		if (err) throw err;
+		initRoutes(function() {
+			cbAfter();			
+			log.info('...app.init()');
+		});
 	});
 }
 
-function initRoutes(options) {
+function initRoutes(cbAfter) {
 
 	//enable CORS
 	if (config.http.cors) {
@@ -75,36 +73,30 @@ function initRoutes(options) {
 		});
 	}
 
-	//all api routes
-	controller = new ApiController(accounts, options);
-	app.use(config.apiRoute, controller.router);
+	controller.init(function(err) {
+		if (err) throw err;
 
-	//other routes static (only used for testing, when node is standalone)
-	app.use('/', express.static('./public', { fallthrough: false }));
+		app.use(config.apiRoute, controller.router);
 
-	//uncaught exception handling 
-	app.use(function(err, req, res, next) {
-
-		log.debug({err: err}, 'app.use()...');
-
-		if (res.headersSent) {
-		    return next(err);
-		}
-
-		log.error({req: req, err: err}, err.message);
-		res.status(500).send({error: err.message});
-
-/*	
-		if (err.name === 'UnauthorizedError') {
-			log.warn({req: req, err: err}, err.message);
-		    res.status(401).send({error: err.message});
-		} else {
+		//other routes static (only used for testing, when node is standalone)
+		app.use('/', express.static('./public', { fallthrough: false }));
+	
+		//uncaught exception handling 
+		app.use(function(err, req, res, next) {
+	
+			log.debug({err: err}, 'app.use()...');
+	
+			if (res.headersSent) {
+				return next(err);
+			}
+	
 			log.error({req: req, err: err}, err.message);
 			res.status(500).send({error: err.message});
-		}
-*/
+		
+			log.debug('...app.use');
+		});
 
-		log.debug('...app.use');
+		cbAfter();
 	});
 
 }

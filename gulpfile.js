@@ -14,6 +14,8 @@ var util = require('util');
 
 var config = require('config');
 
+var git = require('gulp-git');
+
 var inputs = {
     SRC_DIR: './src/',
     SRC_3RDPARTY_DIR: './src/3rdparty/',
@@ -46,7 +48,7 @@ var outputs = {
 	PAGES_DIR: './public/'
 }
 
-var tasks = [
+var install_tasks = [
     'build-data-html',
     'build-schema-html',
     //'build-api-html',
@@ -69,7 +71,11 @@ var tasks = [
 	'copy-fonts'
 ];
 
-gulp.task('default', tasks, function () {
+gulp.task('default', install_tasks, function () {
+    // place code for your default task here
+});
+
+gulp.task('publish', publish_tasks, function () {
     // place code for your default task here
 });
 
