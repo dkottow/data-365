@@ -46,7 +46,8 @@
   },
   "scripts": {
     "start": "node server.js",
-    "test": "mocha"
+    "test": "mocha",
+    "install": "gulp"
   },
   "engines": {
     "node": "6.x"
