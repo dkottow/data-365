@@ -1,7 +1,7 @@
 {
   "name": "rest-server",
   "description": "serves sql databases through a rest api",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "private": true,
   "dependencies": {
     "underscore": "*",
