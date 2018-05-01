@@ -3,6 +3,7 @@ This file in the main entry point for defining Gulp tasks and using Gulp plugins
 Click here to learn more. http://go.microsoft.com/fwlink/?LinkId=518007
 */
 
+var fs = require('fs');
 var gulp = require('gulp');
 var concat = require('gulp-concat');
 var inject = require('gulp-inject');
@@ -14,7 +15,7 @@ var util = require('util');
 
 var config = require('config');
 
-var git = require('gulp-git');
+var pkgjson = require('./package.json');
 
 var inputs = {
     SRC_DIR: './src/',
@@ -48,8 +49,11 @@ var outputs = {
 	PAGES_DIR: './public/'
 }
 
-var install_tasks = [
-    'build-data-html',
+var tasks = [
+
+	'build-swagger-file',
+
+	'build-data-html',
     'build-schema-html',
     //'build-api-html',
 	
@@ -71,12 +75,21 @@ var install_tasks = [
 	'copy-fonts'
 ];
 
-gulp.task('default', install_tasks, function () {
+gulp.task('default', tasks, function () {
     // place code for your default task here
 });
 
-gulp.task('publish', publish_tasks, function () {
-    // place code for your default task here
+gulp.task('build-swagger-file', function(cbAfter) {
+
+	var swagger = require('./etc/swagger.json');
+	swagger.info.version = pkgjson.version;
+    swagger.host = config.url.host;
+    swagger.schemes = [ config.url.protocol ];
+
+    fs.writeFile('./public/swagger.json', JSON.stringify(swagger), function(err) {
+        cbAfter();
+    });
+
 });
 
 gulp.task('build-data-html', function () {
