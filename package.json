@@ -1,52 +1,54 @@
 {
-  "name": "rest-server"
-  , "description": "serves sql databases through a rest api"
-  , "version": "1.1.0"
-  , "private": true
-  , "dependencies": {
-    "underscore": "*"
-    , "express": "4.x"
-    , "body-parser": "*"
-    , "jsonwebtoken": "*"
-    , "express-jwt": "*"
-    , "azure-ad-jwt": "*"
-    , "winston": "*"
-    , "winston-azure": "*"
-    , "dotenv": "*"
-    , "config": "*"
-    , "sqlite3": "*"
-    , "mssql": "4.x"
-    , "graphlib": "*"
-    , "pegjs": "*"
-    , "fast-json-patch": "^1.1.2"
-    , "papaparse": "*"
-    , "node-dir": "*"
-    , "tmp": "*"
-    , "validator": "*"
-    , "commander": "*"
-    , "request": "*"
-    , "gulp": "*"
-    , "gulp-concat": "*"
-    , "gulp-inject": "~1.5.0"
-    , "gulp-replace": "*"
-    , "gulp-if": "*"
-    , "gulp-markdown": "*"
-    , "gulp-insert": "*"
-    , "gulp-rename": "*"
-  }
-  , "devDependencies": {
-    "mocha": "*"
-    , "fs-extra": "*"
-    , "probdist": "*"
-    , "random-js": "*"
-  }
-  , "main": "server.js"
-  , "bin": { "donk": "./donk/donk.js" }
-  , "scripts": {
-      "start": "node server.js"
-    , "test": "mocha"
-  }
-  , "engines": {
+  "name": "rest-server",
+  "description": "serves sql databases through a rest api",
+  "version": "1.1.1",
+  "private": true,
+  "dependencies": {
+    "underscore": "*",
+    "express": "4.x",
+    "body-parser": "*",
+    "jsonwebtoken": "*",
+    "express-jwt": "*",
+    "azure-ad-jwt": "*",
+    "winston": "*",
+    "winston-azure": "*",
+    "dotenv": "*",
+    "config": "*",
+    "sqlite3": "*",
+    "mssql": "4.x",
+    "graphlib": "*",
+    "pegjs": "*",
+    "fast-json-patch": "^1.1.2",
+    "papaparse": "*",
+    "node-dir": "*",
+    "tmp": "*",
+    "validator": "*",
+    "commander": "*",
+    "request": "*",
+    "gulp": "*",
+    "gulp-concat": "*",
+    "gulp-inject": "~1.5.0",
+    "gulp-replace": "*",
+    "gulp-if": "*",
+    "gulp-markdown": "*",
+    "gulp-insert": "*",
+    "gulp-rename": "*"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "fs-extra": "*",
+    "probdist": "*",
+    "random-js": "*"
+  },
+  "main": "server.js",
+  "bin": {
+    "donk": "./donk/donk.js"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "test": "mocha"
+  },
+  "engines": {
     "node": "6.x"
   }
 }
