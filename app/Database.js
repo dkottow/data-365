@@ -211,14 +211,12 @@ Database.prototype.getInsertFields = function(rows, table) {
 		return ! _.isNumber(row.id);
 	});
 
-	var fields = table.fields();
+	var fields = _.clone(table.fields());
 	if (noId) {
-		fields = _.reject(fields, function(field) {
-			return field.name == 'id';
-		});
+		delete fields['id'];
 	}
 
-	return _.object(_.pluck(fields, 'name'), fields);	
+	return fields;	
 }
 
 Database.prototype.getUpdateFields = function(rows, table) {

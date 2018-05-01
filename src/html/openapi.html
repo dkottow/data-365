@@ -1,7 +1,7 @@
 
 <!doctype html>
 <html>
-<head>
+  <head>
     <title>OpenAPI UI</title>
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,700|Source+Code+Pro:300,600|Titillium+Web:400,600,700" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="/css/swagger-ui.css" >
@@ -24,15 +24,8 @@
         background: #fafafa;
       }
     </style>
-  
-    <!-- Donkeylift scripts -->
-    <script src="/js/swagger-ui-bundle.js"> </script>
-    <script src="/js/swagger-ui-standalone-preset.js"> </script>
-
-    <!-- Data365 SharePoint - starts Donkeylift app -->
-    <script type="text/javascript" src="/js/d365_api.js"></script>
-
-<body>
+  </head>  
+  <body>
 
     <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" style="position:absolute;width:0;height:0">
         <defs>
@@ -66,8 +59,35 @@
           </symbol>
       
         </defs>
-      </svg>
+    </svg>
       
-      <div id="swagger-ui"></div>          
+    <div id="swagger-ui"></div>          
 
-</body>
+    <!-- Donkeylift scripts -->
+    <script src="/js/swagger-ui-bundle.js"> </script>
+    <script src="/js/swagger-ui-standalone-preset.js"> </script>
+
+    <script type="text/javascript"> 
+			window.onload = function() { 
+
+        window.ui = SwaggerUIBundle({
+            url: "/swagger.json",
+            dom_id: '#swagger-ui',
+            deepLinking: true,
+            presets: [
+                SwaggerUIBundle.presets.apis,
+                SwaggerUIStandalonePreset
+            ],
+            plugins: [
+                SwaggerUIBundle.plugins.DownloadUrl
+            ],
+            layout: "StandaloneLayout"
+        })
+
+      }
+
+	</script>
+
+
+  </body>
+</html>
