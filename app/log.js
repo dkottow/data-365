@@ -122,6 +122,20 @@ var rewriteConfig = function(level, msg, obj) {
 
 var rewriteRequest = function(level, msg, obj) {
 	if (obj && obj.req) {
+		var req = {
+			url: obj.req.url,
+			method: obj.req.method,
+			params: obj.req.params,
+			query: obj.req.query
+		}
+		req.user = obj.req.user ? obj.req.user.name() : undefined;
+		if (level == 'debug' || level == 'silly') {
+			req.headers = obj.req.headers;
+		}
+
+		obj.req = req;
+
+		/*
 		var user;
 		if (obj.req.user) {
 			user = {
@@ -136,6 +150,7 @@ var rewriteRequest = function(level, msg, obj) {
 			, params: obj.req.params
 			, query: obj.req.query
 		};
+		*/
 	}
 	return obj;
 }
