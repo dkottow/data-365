@@ -14,18 +14,12 @@
    limitations under the License.
 */
 
-var util = require('util');
-var url = require('url');
-
-var _ = require('underscore');
-
 var express = require('express');
 var config = require('config');
 
 var AccountManager = require('./AccountManagerFactory.js').AccountManagerFactory;
 
 var ApiController = require('./ApiController.js').ApiController;
-var funcs = require('./funcs.js');
 
 var app = express();
 var log = require('./log.js').log;
@@ -46,7 +40,6 @@ accountConfig.accounts = config.accounts;
 
 app.init = function(cbAfter) {
 	log.info({config: accountConfig}, 'app.init()...');
-
 	accounts = AccountManager.create(accountConfig);
 	controller = new ApiController(accounts, { auth: config.auth });
 	

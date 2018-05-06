@@ -39,6 +39,7 @@
         "transports": [
             {
                 "type": "console",
+                "timestamp": true,
                 "level": "debug",
                 "colorize": true
             }

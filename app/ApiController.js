@@ -19,7 +19,6 @@ var util = require('util');
 var url = require('url');
 var express = require('express');
 var bodyParser = require('body-parser');
-//var jwt = require('express-jwt'); //Auth0
 var jwt = require('azure-ad-jwt');	//AAD
 var config = require('config');
 
@@ -30,7 +29,7 @@ var path = require('path');
 
 var parser = require('./QueryParser.js');
 var AccessControl = require('./AccessControl.js').AccessControl;
-var Schema = require('./Schema.js').Schema;
+//var Schema = require('./Schema.js').Schema;
 var Table = require('./Table.js').Table;
 var Field = require('./Field.js').Field;
 var User = require('./User.js').User;
