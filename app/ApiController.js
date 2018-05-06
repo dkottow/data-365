@@ -27,7 +27,12 @@ var pkgjson = require('../package.json');
 var fs = require('fs');
 var path = require('path');
 
-var parser = require('./QueryParser.js');
+var parser;
+function req_parser() {
+	if (! parser ) parser = require('./QueryParser.js');
+	return parser;
+}
+
 var AccessControl = require('./AccessControl.js').AccessControl;
 //var Schema = require('./Schema.js').Schema;
 var Table = require('./Table.js').Table;
@@ -994,7 +999,7 @@ Controller.prototype.parseQueryParameters = function(queryObj) {
 	_.each(queryObj, function(v, k) {
 		try {
 			if (k[0] == '$') {
-				var param = parser.parse(k + "=" + v);	
+				var param = req_parser().parse(k + "=" + v);	
 				params[param.name] = param.value;
 			} else if (_.contains(Controller.QUERY_PARAMS.integer, k)) {
 				params[k] = parseInt(v);
