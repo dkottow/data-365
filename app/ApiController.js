@@ -61,7 +61,7 @@ Controller.prototype.init = function(cbAfter) {
 }
 
 Controller.prototype._initRoutes = function() {
-	log.trace("Controller.initRoutes()...");		
+	log.debug("Controller.initRoutes()...");		
 	var me = this;
 	var options = this.options;
 
@@ -102,8 +102,8 @@ Controller.prototype._initRoutes = function() {
 				log.debug({jwt: token}, 'Authorization token');
 				jwt.verify(token.substr('Bearer '.length), null, function(err, result) {
 					if (err) {
-						log.error({err: err}, 'Authorization token');
-						sendError(req, res, new Error("Authorization token '" + token + "' not valid"), 401);
+						log.error({err: err, token, token}, 'Authorization token');
+						me.sendError(req, res, new Error("Authorization token '" + token + "' not valid"), 401);
 						return;
 					}
 					req.user = new User(result.upn, me.accountManager.masterDatabase());
@@ -112,6 +112,9 @@ Controller.prototype._initRoutes = function() {
 				return;
 			}
 
+			//no auth provided
+			log.error('Authentication missing');
+			me.sendError(req, res, new Error("Authentication missing"), 401);
 		});
 
 	} else {
@@ -206,7 +209,7 @@ Controller.prototype._initRoutes = function() {
 		me.chownRows(req, res);
 	});
 
-	log.trace("...Controller.initRoutes()");		
+	log.debug("...Controller.initRoutes()");		
 }
 
 //start request handler methods.
@@ -1064,12 +1067,14 @@ Controller.prototype.version = function() {
 }
 
 Controller.prototype.getLoginInfo = function(req) {
-	return {
-		user: req.user.name(),
-		principal: req.user.principal(),
-		timestamp: Field.dateToString(new Date()),
-		gitrev: this.version()
+	var info = {
+		timestamp: Field.dateToString(new Date())
+	};
+	if (req.user) {
+		info.user = req.user.name();
+		info.principal = req.user.principal();
 	}
+	return info;
 }
 
 Controller.prototype.getDataObjects = function(req, objs) {

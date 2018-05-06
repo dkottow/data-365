@@ -71,16 +71,28 @@ DatabaseMssql.prototype.name = function() {
 }
 
 DatabaseMssql.prototype.connect = function() {
+	var me = this;
 	if ( ! this.pool) {
+		log.debug('DatabaseMssql.connect - new pool ' + me.name());
 		this.pool = new mssql.ConnectionPool(this.config);
 	}
 	if (this.pool.connecting) {
 		//try again. later..
-		var me = this;
 		return new Promise(function(resolve, reject) {
 			setTimeout(function() { resolve(me.connect()); }, 100);
 		});
 	}
+
+	//recycle pool if idle.
+	if (this.config.recyclePoolTimeout > 0) {
+		if (this.recyclePoolTimeout) clearTimeout(this.recyclePoolTimeout);
+		this.recyclePoolTimeout = setTimeout(function() { 
+			log.debug('DatabaseMssql.connect - recycle pool ' + me.name());
+			me.pool.close();
+			me.pool = null;
+		}, me.config.recyclePoolTimeout);
+	}
+		
 	return this.pool.connected ? Promise.resolve() : this.pool.connect();
 }
 

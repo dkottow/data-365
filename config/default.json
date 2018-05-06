@@ -1,6 +1,4 @@
 {
-    "version": "1.0.0",
-
     "auth"  : false,
 
 	"ip"    : "localhost",
@@ -28,7 +26,6 @@
 
     "sql": {
         "pageRows"  : 1000,
-        "initRetryInterval": 100,
         "engine"    : "mssql",
         "connection": {
             "server": "localhost\\HOLEBASE_SI",
@@ -37,10 +34,11 @@
             "domain": "GOLDER", //AD user domain
             "options": {
                 "encrypt": false // Use this if you're on Windows Azure
-            }            
+            },
+            "recyclePoolTimeout": 60000 //recylce after 10min idle - 0 or undefined means never
         },
-
-        "elasticPool": "" //leave empty if no pool
+        "elasticPool": "", //leave empty if no pool
+        "initRetryInterval": 100,
     },
     
     "url"   : {
