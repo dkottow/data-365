@@ -33,7 +33,8 @@
                 "max": 15,
                 "min": 5            
             },
-            "requestTimeout": 20000 // millisecs 
+            "requestTimeout": 20000, // millisecs 
+            "recyclePoolTimeout": 300000 //recylce after 30min idle - 0 or undefined means never
         },
         "elasticPool": "AZD365ProdWUSEP" //leave empty if no pool
     },
