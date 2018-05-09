@@ -56,11 +56,8 @@ var tasks = [
 	'build-data-html',
     'build-schema-html',
     'build-api-html',
-/*	
-	'build-d365-data-js',
-    'build-d365-schema-js',
-    'build-d365-api-js',
-*/	
+    'build-index-html',
+
 	'build-dl-data-js',
     'build-dl-schema-js',
     'build-dl-3rdparty-js',
@@ -172,7 +169,12 @@ gulp.task('build-schema-html', function () {
 gulp.task('build-api-html', function () {
 
     return gulp.src([ inputs.SRC_DIR + 'html/openapi.html' ])
+		.pipe(gulp.dest(outputs.PAGES_DIR));
+});
 
+gulp.task('build-index-html', function () {
+
+    return gulp.src([ inputs.SRC_DIR + 'html/index.html' ])
 		.pipe(gulp.dest(outputs.PAGES_DIR));
 });
 
