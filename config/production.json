@@ -33,20 +33,15 @@
                 "max": 15,
                 "min": 5            
             },
-            "requestTimeout": 20000 // millisecs 
+            "requestTimeout": 30000, // millisecs 
+            "recyclePoolTimeout": 3600000 //recylce after 60min = 3600,000ms idle - 0 or undefined means never
         },
         "elasticPool": "AZD365ProdWUSEP" //leave empty if no pool
     },
     
     "url": {
-        "host": "azd365prodwuas.azurewebsites.net",
+        "host": "data365.golder.com",
         "protocol": "https"
-    },
-
-    "http": {
-        "cors": true,
-        "headers": {
-            "AccessControlAllowOrigin": "https://golderassociates.sharepoint.com"
-        }
     }
+
 }
