@@ -27,6 +27,8 @@ var pkgjson = require('../package.json');
 var fs = require('fs');
 var path = require('path');
 
+var multer  = require('multer');
+
 var parser;
 function req_parser() {
 	if (! parser ) parser = require('./QueryParser.js');
@@ -60,6 +62,59 @@ Controller.prototype.init = function(cbAfter) {
 	log.debug("...Controller.init().");		
 }
 
+Controller.prototype._getAuthHandler = function(options) {
+	var me = this;
+	if (options.auth == false) {
+		return function(req, res, next) {
+			req.user = new User(req.query.user || User.NOBODY, me.accountManager.masterDatabase());	
+			next();
+		};
+	}
+
+	var isNonceRoute = function(path) {
+		var result = _.find(_.values(Controller.NonceRoutes), function(regExp) {
+			return path.match(regExp);
+		});					
+		return !! result;
+	};
+
+	return function(req, res, next) {
+
+		if (isNonceRoute(req.path)) {
+			log.debug({path: req.path}, 'Nonce request.. pass through');
+			next();
+			return;
+		}
+
+		//pick up identity
+		if (req.header('x-ms-client-principal-name')) {
+			req.user = new User(req.header('x-ms-client-principal-name'), me.accountManager.masterDatabase());
+			next();			
+			return;
+		}
+
+		//decode AAD Authorization token
+		var token = req.header('Authorization');
+		if (token && token.startsWith('Bearer ')) {
+			log.debug({jwt: token}, 'Authorization token');
+			jwt.verify(token.substr('Bearer '.length), null, function(err, result) {
+				if (err) {
+					log.error({err: err, token, token}, 'Authorization token');
+					me.sendError(req, res, new Error("Authorization token '" + token + "' not valid"), 401);
+					return;
+				}
+				req.user = new User(result.upn, me.accountManager.masterDatabase());
+				next();
+			});
+			return;
+		}
+
+		//no auth provided
+		log.error('Authentication missing');
+		me.sendError(req, res, new Error("Authentication missing"), 401);
+	}
+}
+
 Controller.prototype._initRoutes = function() {
 	log.debug("Controller.initRoutes()...");		
 	var me = this;
@@ -69,61 +124,11 @@ Controller.prototype._initRoutes = function() {
 
 	//json parsing 
 	this.router.use(bodyParser.json({ limit: reqSizeLimit }));
+
 	//urlencoded parsing (used by POST requests to add/mod/del rows)
 	this.router.use(bodyParser.urlencoded({ limit: reqSizeLimit, extended: true }));
 
-	if (options.auth) {
-
-		var isNonceRoute = function(path) {
-			var result = _.find(_.values(Controller.NonceRoutes), function(regExp) {
-				return path.match(regExp);
-			});					
-			return !! result;
-		};
-	
-		this.router.use(function(req, res, next) {
-
-			if (isNonceRoute(req.path)) {
-				log.debug({path: req.path}, 'Nonce request.. pass through');
-				next();
-				return;
-			}
-
-			//pick up identity
-			if (req.header('x-ms-client-principal-name')) {
-				req.user = new User(req.header('x-ms-client-principal-name'), me.accountManager.masterDatabase());
-				next();			
-				return;
-			}
-
-			//decode AAD Authorization token
-			var token = req.header('Authorization');
-			if (token && token.startsWith('Bearer ')) {
-				log.debug({jwt: token}, 'Authorization token');
-				jwt.verify(token.substr('Bearer '.length), null, function(err, result) {
-					if (err) {
-						log.error({err: err, token, token}, 'Authorization token');
-						me.sendError(req, res, new Error("Authorization token '" + token + "' not valid"), 401);
-						return;
-					}
-					req.user = new User(result.upn, me.accountManager.masterDatabase());
-					next();
-				});
-				return;
-			}
-
-			//no auth provided
-			log.error('Authentication missing');
-			me.sendError(req, res, new Error("Authentication missing"), 401);
-		});
-
-	} else {
-		this.router.use(function(req, res, next) {
-			req.user = new User(req.query.user || User.NOBODY, me.accountManager.masterDatabase());	
-			next();
-		});
-	}
-	
+	this.router.use(this._getAuthHandler(options));
 
 	this.router.get('/', function(req, res) {
 		me.listAccounts(req, res);
@@ -165,6 +170,20 @@ Controller.prototype._initRoutes = function() {
 
 	this.router.post(/^\/(\w+)\/(\w+)\/(\w+)\.nonce$/, function(req, res) {
 		me.doNonceRequest(req, res);
+	});
+
+	var storage = multer.diskStorage({
+		destination: function(req, file, cb) {
+			cb(null, me.access.getTempPath());
+		},
+		filename: function(req, file, cb) {
+			cb(null, me.access.getRandomFilename('csv'));
+		},
+	});
+	var upload = multer({ storage: storage });
+
+	this.router.post(Controller.NonceRoutes.TABLE_CSV_FILE, upload.single('csv'), function(req, res) {
+		me.postCSVFile(req, res);
 	});
 	
 	this.router.route(/^\/(\w+)\/(\w+)\/(\w+)(?:\.rows)?$/)
@@ -495,7 +514,7 @@ Controller.prototype.getCSVFile = function(req, res) {
 		return me.access.authorize('getCSVFile', req, data);
 	
 	}).then((access) => { 
-		res.sendFile(me.access.getNoncePath(req.query.nonce, "csv"), function(err) {
+		res.sendFile(me.access.getTempPath(req.query.nonce, "csv"), function(err) {
 			if (err) {
 				me.sendError(req, res, err);
 				return;
@@ -510,52 +529,95 @@ Controller.prototype.getCSVFile = function(req, res) {
 	});
 }
 
-Controller.prototype.doNonceRequest = function(req, res) {
-	log.info({req: req, path: req.body.path}, 'Controller.doNonceRequest()...');
-
+Controller.prototype.postCSVFile = function(req, res) {
 	var me = this;
-	var op, opts;
-
-	if (req.body.path.match(Controller.NonceRoutes.TABLE_CSV_FILE)) {
-		op = 'generateCSVFile';
-		opts = {account: true, db: true, table: true };
-	} else {
-		var err = new Error("unknown nonce operation '" + req.body.path + "'");
-		me.sendError(req, res, err, 400);
-		return;		
-	}
+	log.info({req: req}, 'Controller.postCSVFile()...');
 
 	var data;
-	this.getDataObjects(req, opts).then((result) => {
+	this.getDataObjects(req, {account: true, db: true, table: true}).then((result) => {
 		data = result;
-		return me.access.authorize(op, req, data);
+		return me.access.authorize('postCSVFile', req, data);
 	
 	}).then((access) => { 
-		return me.access.createNonce(op);
-
-	}).then((nonce) => { 
-		
-		data.nonce = nonce;	
-		me[op](req, data, function(err) {
-
-			if (err) {
-				me.sendError(req, res, err);
-				return;
-			}
-
-			var result = {
-				nonce: nonce
-			};
-			result.login = me.getLoginInfo(req);
-
-			res.send(result); 
-			log.info({req: req}, '...Controller.requestNonce().');
-		});
+		log.debug({file: req.file}, 'Controller.postCSVFile()');
+		var result = me.ingestCSVFile(req, data); //async, writes result to _d365ChangeLog
+		res.send(result);
+		log.info({req: req}, '...Controller.postCSVFile().');
 
 	}).catch(err => {
 		me.sendError(req, res, err);
 		return;
-	});	
+	});
+}
+
+var fs = require('fs');
+
+Controller.prototype.generateCSVFile = function(req, data, cbAfter) {
+	log.debug('Controller.generateCSVFile()...');
+
+	var me = this;
+
+	var urlObj = url.parse(req.body.path, true);
+	var params = me.parseQueryParameters(urlObj.query);
+	if (params.error) {
+		cbAfter(params.error);
+		return;
+	}
+
+	var q = { filter: params.values['$filter'], fields: params.values['$select'] };
+
+	me.access.filterQuery(data, q, req.user).then((filter) => {
+
+		var limit = params.values['$top'] || 1000000; //max 1M rows
+
+		data.db.all(data.table.name, {
+			filter: filter 
+			, fields: params.values['$select'] 
+			, order: params.values['$orderby'] 
+			, limit: limit 
+			, format: 'csv'	
+		},
+
+			function(err, result) { 
+				if (err) {
+					cbAfter(err);
+					return;
+				}
+
+				var content = result;
+				fs.writeFile(me.access.getTempPath(data.nonce, "csv"), content, function(err) {
+					cbAfter(err);
+					log.info({ req: req }, '...Controller.generateCSVFile().');
+				});							
+			}
+		);
+
+	}).catch(err => {
+		cbAfter(err);
+		return;
+	});
+
+	log.debug('...Controller.generateCSVFile().');
+}
+
+Controller.prototype.ingestCSVFile = function(req, data) {
+	log.debug({ req: req }, 'Controller.ingestCSVFile()...');
+
+	var metadata = {
+		path: req.path,
+		serverFile: path.basename(req.file.filename),
+		clientFile: req.file.originalname, 
+		size: req.file.size,
+		user: req.user.name()
+	};
+
+	if (req.query.replace != 1) {
+		data.db.insertCSVRows(data.table.name, req.file.path, metadata);
+	} else {
+		data.db.updateCSVRows(data.table.name, req.file.path, metadata);
+	}
+
+	return metadata;
 }
 
 Controller.prototype.getRows = function(req, res) {
@@ -940,57 +1002,58 @@ Controller.prototype.chownRows = function(req, res) {
 	});
 }
 
+Controller.prototype.doNonceRequest = function(req, res) {
+	log.info({req: req, path: req.body.path}, 'Controller.doNonceRequest()...');
+
+	var me = this;
+	var op, opts;
+
+	if (req.body.path.match(Controller.NonceRoutes.TABLE_CSV_FILE)) {
+		op = 'generateCSVFile';
+		opts = {account: true, db: true, table: true };
+
+	} else {
+		var err = new Error("unknown nonce operation '" + req.body.path + "'");
+		me.sendError(req, res, err, 400);
+		return;		
+	}
+
+	var data;
+	this.getDataObjects(req, opts).then((result) => {
+		data = result;
+		return me.access.authorize(op, req, data);
+	
+	}).then((access) => { 
+		return me.access.createNonce(op);
+
+	}).then((nonce) => { 
+		
+		data.nonce = nonce;	
+		me[op](req, data, function(err) {
+
+			if (err) {
+				me.sendError(req, res, err);
+				return;
+			}
+
+			var result = {
+				nonce: nonce
+			};
+			result.login = me.getLoginInfo(req);
+
+			res.send(result); 
+			log.info({req: req}, '...Controller.requestNonce().');
+		});
+
+	}).catch(err => {
+		me.sendError(req, res, err);
+		return;
+	});	
+}
+
 //end request handler methods.
 
 //private methods
-
-var fs = require('fs');
-
-Controller.prototype.generateCSVFile = function(req, data, cbAfter) {
-	var me = this;
-
-	var urlObj = url.parse(req.body.path, true);
-	var params = me.parseQueryParameters(urlObj.query);
-	if (params.error) {
-		cbAfter(params.error);
-		return;
-	}
-
-	var q = { filter: params.values['$filter'], fields: params.values['$select'] };
-
-	me.access.filterQuery(data, q, req.user).then((filter) => {
-
-		var limit = params.values['$top'] || 1000000; //max 1M rows
-
-		data.db.all(data.table.name, {
-			filter: filter 
-			, fields: params.values['$select'] 
-			, order: params.values['$orderby'] 
-			, limit: limit 
-			, format: 'csv'	
-		},
-
-			function(err, result) { 
-				if (err) {
-					cbAfter(err);
-					return;
-				}
-
-				var content = result;
-				fs.writeFile(me.access.getNoncePath(data.nonce, "csv"), content, function(err) {
-					cbAfter(err);
-					log.info({ req: req }, '...Controller.generateCSVFile().');
-				});							
-			}
-		);
-
-	}).catch(err => {
-		cbAfter(err);
-		return;
-	});
-
-	log.debug('...Controller.generateCSVFile().');
-}
 
 Controller.QUERY_PARAMS = {
 	'integer': ['debug', 'counts']

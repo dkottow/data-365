@@ -18,7 +18,7 @@ var path = require('path');
 var _ = require('underscore');
 var config = require('config');
 var winston = require('winston');
-require('winston-azure'); //add winston-azure
+//require('winston-azure'); //add winston-azure
 
 var winstonLogger;
 function init() {
@@ -37,12 +37,14 @@ function init() {
 			} else if (options.type == 'file' && ! path.isAbsolute(options.filename)) {
 				options.filename = path.join(process.cwd(), options.filename);
 				transport = new winston.transports.File(options);
-
+			}
+/*
 			} else if (options.type == 'azure') {
 				options.partition = require('os').hostname();
 				transport = new winston.transports.Azure(options);
 				transport.name = options.name; //otherwise not picked up by winston-azure
 			}
+*/
 			if (transport) {
 				winstonLogger.add(transport, {}, true);			
 			} else {

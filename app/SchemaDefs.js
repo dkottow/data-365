@@ -207,4 +207,14 @@ SchemaDefs.PROPERTIES_FIELDS = {
 	value : 'Value'
 };
 
+SchemaDefs.CHANGELOG_TABLE = "_d365Changelog";
+/*
+SchemaDefs.CHANGELOG_FIELDS = {
+	name : 'Name',
+	table : 'TableName',
+	field : 'FieldName',
+	value : 'Value'
+};
+*/
+
 exports.SchemaDefs = SchemaDefs;
