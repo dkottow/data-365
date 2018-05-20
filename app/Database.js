@@ -450,21 +450,21 @@ Database.prototype.parseCSV = function(filename, cbResult) {
 	});
 } 
 
-Database.prototype.insertCSVRows = function(tableName, csvPath, metadata, cbResult) {
-	this._upsertCSVRows('insert', tableName, csvPath, metadata, cbResult);
+Database.prototype.insertCSVRows = function(tableName, csvPath, options, cbResult) {
+	this._upsertCSVRows('insert', tableName, csvPath, options, cbResult);
 }
 
-Database.prototype.updateCSVRows = function(tableName, csvPath, metadata, cbResult) {
-	this._upsertCSVRows('update', tableName, csvPath, metadata, cbResult);
+Database.prototype.updateCSVRows = function(tableName, csvPath, options, cbResult) {
+	this._upsertCSVRows('update', tableName, csvPath, options, cbResult);
 }
 
-Database.prototype._upsertCSVRows = function(action, tableName, csvPath, metadata, cbResult) {
+Database.prototype._upsertCSVRows = function(action, tableName, csvPath, options, cbResult) {
 	var me = this;
 	var changeLog = {
 		Action: action,
-		Path: metadata.path, 
-		User: metadata.user,
-		Metadata: JSON.stringify(metadata)
+		Path: options.path, 
+		User: options.user.name(),
+		Metadata: JSON.stringify(options.metadata)
 	};
 	
 	var table = this.table(tableName);
@@ -472,10 +472,11 @@ Database.prototype._upsertCSVRows = function(action, tableName, csvPath, metadat
 	this.insert(SchemaDefs.CHANGELOG_TABLE, [ changeLog ], function(err, result) {
 		if (err) {
 			log.error({err: err}, 'insertChangelog Database.upsertCSVRows');
+			cbResult(err);
 			return;
 		}
 
-		var changeId = result.rows[0].id;
+		changeLog.id = result.rows[0].id;
 
 		//async update or insert into csv file into db
 		me.parseCSV(csvPath, function(err, result) {
@@ -483,7 +484,7 @@ Database.prototype._upsertCSVRows = function(action, tableName, csvPath, metadat
 				if (result) {
 					err = new Error(err.message + ' ' + JSON.stringify(result.errors.slice(0,10)));
 				}
-				me._updateChangelog(changeId, err);	
+				me._updateChangelog(changeLog.id, err);	
 				return;
 			} 
 
@@ -495,37 +496,39 @@ Database.prototype._upsertCSVRows = function(action, tableName, csvPath, metadat
 
 			if (unknownFields.length > 0) {
 				var err = new Error('Unknown fields ' + JSON.stringify(unknownFields));
-				me._updateChangelog(changeId, err);	
+				me._updateChangelog(changeLog.id, err);	
 				return;
 			} 
 			
 			var opts = { 
-				user: req.user
+				user: options.user
 			};
 			if (action == 'insert') {
 				me.insert(tableName, result.data, opts, function(err, result) {
 					if (err) {
+						log.error({err: err}, 'Database.upsertCSVFile');						
 						var err = new Error('Insert failed ' + err.message);
-						me._updateChangelog(changeId, err);	
+						me._updateChangelog(changeLog.id, err);	
 						return;
 					}
-					me._updateChangelog(changeId, 'success');	
+					me._updateChangelog(changeLog.id, 'success');	
 					log.debug('...Database.insertCSVFile().');	
 				});
 			} else if (action == 'update') {
 				me.update(tableName, result.data, opts, function(err, result) {
 					if (err) {
+						log.error({err: err}, 'Database.upsertCSVFile');						
 						var err = new Error('Update failed ' + err.message);
-						me._updateChangelog(changeId, err);	
+						me._updateChangelog(changeLog.id, err);	
 						return;
 					}
-					me._updateChangelog(changeId, 'success');	
-					log.debug('...Database.insertCSVFile().');	
+					me._updateChangelog(changeLog.id, 'success');	
+					log.debug('...Database.upsertCSVFile().');	
 				});
 			}
 		});
 		
-		return changeLog;
+		cbResult(null, changeLog);
 		log.debug('...Controller.ingestCSVFile().');	
 	});
 }
@@ -537,7 +540,6 @@ Database.prototype._updateChangelog = function(changeId, result) {
 
 	log.debug({result: result}, 'Database.updateChangelog');
 	if (result instanceof Error) {
-		log.error({err: result}, 'Database.updateChangelog');
 		row.Result = 'error';
 		row.ResultDetails = result.message;
 	} else  {

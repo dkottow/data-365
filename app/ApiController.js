@@ -540,9 +540,12 @@ Controller.prototype.postCSVFile = function(req, res) {
 	
 	}).then((access) => { 
 		log.debug({file: req.file}, 'Controller.postCSVFile()');
-		var result = me.ingestCSVFile(req, data); //async, writes result to _d365ChangeLog
-		res.send(result);
-		log.info({req: req}, '...Controller.postCSVFile().');
+		me.ingestCSVFile(req, data, function(err, changeLog) {
+			var result = { changelog: changeLog };
+			result.login = me.getLoginInfo(req);	
+			res.send(result);
+			log.info({req: req}, '...Controller.postCSVFile().');
+		});
 
 	}).catch(err => {
 		me.sendError(req, res, err);
@@ -600,21 +603,25 @@ Controller.prototype.generateCSVFile = function(req, data, cbAfter) {
 	log.debug('...Controller.generateCSVFile().');
 }
 
-Controller.prototype.ingestCSVFile = function(req, data) {
+Controller.prototype.ingestCSVFile = function(req, data, cbResult) {
 	log.debug({ req: req }, 'Controller.ingestCSVFile()...');
 
 	var metadata = {
-		path: req.path,
 		serverFile: path.basename(req.file.filename),
 		clientFile: req.file.originalname, 
 		size: req.file.size,
-		user: req.user.name()
 	};
 
+	var options = {
+		path: req.path,
+		user: req.user,
+		metadata: metadata
+	}
+
 	if (req.query.replace != 1) {
-		data.db.insertCSVRows(data.table.name, req.file.path, metadata);
+		data.db.insertCSVRows(data.table.name, req.file.path, options, cbResult);
 	} else {
-		data.db.updateCSVRows(data.table.name, req.file.path, metadata);
+		data.db.updateCSVRows(data.table.name, req.file.path, options, cbResult);
 	}
 
 	return metadata;
