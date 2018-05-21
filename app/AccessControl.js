@@ -245,9 +245,16 @@ AccessControl.prototype.filterQuery = function(path, query, user) {
 
 }
 
-AccessControl.prototype.getNoncePath = function(nonce, ext) {
-	var nonceDir = tempDir;
-	return path.join(nonceDir, nonce + "." + ext);
+AccessControl.prototype.getRandomFilename = function(ext) {
+	var filename = crypto.randomBytes(16).toString('hex');
+	if (ext) filename = filename + "." + ext;
+	return filename;
+} 
+
+AccessControl.prototype.getTempPath = function(filename, ext) {
+	if ( ! filename) return tempDir;
+	if ( ! ext) return path.join(tempDir, filename);
+	return path.join(tempDir, filename + "." + ext);
 }
 
 AccessControl.prototype.supportsNonce = function(op) {
@@ -263,8 +270,8 @@ AccessControl.prototype.createNonce = function(op, cbResult) {
 	return new Promise(function(resolve, reject) {
 
 		if (me.supportsNonce(op)) {
-			var nonce = crypto.randomBytes(48).toString('hex');
-			var path = me.getNoncePath(nonce, "nonce");
+			var nonce = me.getRandomFilename('nonce');
+			var path = me.getTempPath(nonce);
 			fs.open(path, "w", function (err, fd) {
 				if (err) {
 					reject(err);
@@ -289,7 +296,7 @@ AccessControl.prototype.deleteNonceFile = function(nonce, ext) {
 	var me = this;
 	return new Promise(function(resolve, reject) {
 
-		fs.unlink(me.getNoncePath(nonce, ext), function(err) {
+		fs.unlink(me.getTempPath(nonce, ext), function(err) {
 			if (err) {
 				log.error({ err: err, nonce: nonce }, 'AccessControl.deleteNonceFile');
 				var err = new Error('invalid nonce');
