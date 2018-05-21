@@ -578,7 +578,8 @@ Controller.prototype.generateCSVFile = function(req, data, cbAfter) {
 			, fields: params.values['$select'] 
 			, order: params.values['$orderby'] 
 			, limit: limit 
-			, format: 'csv'	
+			, format: 'csv'
+			, delimiter: params.values['delimiter']	
 		},
 
 			function(err, result) { 
@@ -657,6 +658,7 @@ Controller.prototype.getRows = function(req, res) {
 			, offset: params.values['$skip'] 
 			, debug: params.values['debug']	
 			, format: params.values['format']	
+			, delimiter: params.values['delimiter']	
 			, counts: params.values['counts']	
 		},
 
@@ -841,6 +843,7 @@ Controller.prototype.getViewRows = function(req, res) {
 				, offset: params.values['$skip'] 
 				, debug: params.values['debug']	
 				, format: params.values['format']	
+				, delimiter: params.values['delimiter']	
 			},
 	
 			function(err, result) { 

@@ -409,6 +409,7 @@ Database.prototype.allSanitizeOptions = function(options) {
 	result.offset = options.offset;
 	result.debug = options.debug == 1 || false;
 	result.format = options.format || 'json';
+	result.delimiter = options.delimiter || ','; //csv format option
 	result.counts = options.counts == 1 || false;
 	log.trace({ result: result }, '...Database.allSanitizeOptions()');
 	return result;
@@ -569,8 +570,9 @@ Database.prototype.allResult = function(tableName, rows, countRows, sql, options
 
 
 	if (opts.format == 'csv') {
-		return Papa.unparse(rows);
-
+		return Papa.unparse(rows, {
+			delimiter: opts.delimiter
+		});
 	} 
 	
 	var result = { 
