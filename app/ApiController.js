@@ -619,6 +619,10 @@ Controller.prototype.ingestCSVFile = function(req, data, cbResult) {
 		metadata: metadata
 	}
 
+	options.parser = {
+		delimiter: req.query.delimiter
+	}
+
 	if (req.query.replace != 1) {
 		data.db.insertCSVRows(data.table.name, req.file.path, options, cbResult);
 	} else {

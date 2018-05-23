@@ -561,7 +561,7 @@ DatabaseMssql.prototype.insert = function(tableName, rows, options, cbResult) {
 
 					var values = me.getFieldValues(row, fields);
 					log.debug({values: values}, 'insert row');
-					if (values.err) return Promise.reject(new Error(values.err));
+					if (values.err) return Promise.reject(new Error(values.err + ", row = " + (rowIds.length+1)));
 					var valObj = _.object(fieldNames, values.values);	
 					return stmt.execute(valObj);					
 				} 
@@ -701,7 +701,7 @@ DatabaseMssql.prototype.update = function(tableName, rows, options, cbResult) {
 					row.mod_by = mod_by;
 
 					var values = me.getFieldValues(row, fields);
-					if (values.err) return Promise.reject(new Error(values.err));
+					if (values.err) return Promise.reject(new Error(values.err + ", row = " + (modCount+1)));
 					var valObj = _.object(fieldNames, values.values);	
 					valObj['id'] = row.id;
 					log.trace({values: valObj}, 'doUpdate values');
