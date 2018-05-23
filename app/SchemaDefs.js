@@ -103,7 +103,38 @@ SchemaDefs.MANDATORY_TABLES = [
 				"type": "text(256)"
 			}
 		]
-	}
+	},
+	{
+		"name": "_d365Changelog",
+		"row_alias": [],
+		"disabled": false,
+		"fields": [
+			{
+				"name": "Action",
+				"type": "text(4000)"
+			},
+			{
+				"name": "User",
+				"type": "text(4000)",
+			},
+			{
+				"name": "Path",
+				"type": "text(4000)",
+			},
+			{
+				"name": "Metadata",
+				"type": "text(4000)"
+			},
+			{
+				"name": "Result",
+				"type": "text(4000)",
+			},
+			{
+				"name": "ResultDetails",
+				"type": "text(4000)",
+			}
+		]
+	}	
 ];
 
 var keys = {

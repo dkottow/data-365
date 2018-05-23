@@ -201,7 +201,7 @@ FieldInteger.prototype = new Field;
 FieldInteger.prototype.constructor = FieldInteger;
 FieldInteger.prototype.parse = function(val) { 
 	if (val == null) return null; 
-	if (val == '') return null; 
+	if (val === '') return null; 
 	return parseInt(val); 
 }
 
@@ -215,7 +215,7 @@ FieldDecimal.prototype.constructor = FieldDecimal;
 FieldDecimal.prototype.typeName = function() { return 'decimal'; }
 FieldDecimal.prototype.parse = function(val) { 
 	if (val == null) return null; 
-	if (val == '') return null; 
+	if (val === '') return null; 
 	return parseFloat(val); 
 }
 
@@ -228,7 +228,7 @@ FieldDate.prototype = new Field;
 FieldDate.prototype.constructor = FieldDate;
 FieldDate.prototype.parse = function(val) { 
 	if (val == null) return null; 
-	if (val == '') return null; 
+	if (val === '') return null; 
 	return Field.parseDateUTC(val).toISOString().substring(0, 10);
 }
 
@@ -241,7 +241,7 @@ FieldTimestamp.prototype = new Field;
 FieldTimestamp.prototype.constructor = FieldTimestamp;
 FieldTimestamp.prototype.parse = function(val) { 
 	if (val == null) return null; 
-	if (val == '') return null; 
+	if (val === '') return null; 
 	return Field.parseDateUTC(val).toISOString();
 }
 
@@ -253,7 +253,7 @@ FieldFloat.prototype = new Field;
 FieldFloat.prototype.constructor = FieldFloat;
 FieldFloat.prototype.parse = function(val) { 
 	if (val == null) return null; 
-	if (val == '') return null; 
+	if (val === '') return null; 
 	return parseFloat(val); 
 }
 
@@ -265,7 +265,7 @@ FieldBoolean.prototype = new Field;
 FieldBoolean.prototype.constructor = FieldBoolean;
 FieldBoolean.prototype.parse = function(val) { 
 	if (val == null) return null; 
-	if (val == '') return null; 
+	if (val === '') return null; 
 	return Boolean(val); 
 }
 

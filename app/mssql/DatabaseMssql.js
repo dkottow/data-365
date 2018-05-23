@@ -560,7 +560,7 @@ DatabaseMssql.prototype.insert = function(tableName, rows, options, cbResult) {
 					row.own_by = row.own_by || own_by;
 
 					var values = me.getFieldValues(row, fields);
-					log.trace({values: values}, 'insert row');
+					log.debug({values: values}, 'insert row');
 					if (values.err) return Promise.reject(new Error(values.err));
 					var valObj = _.object(fieldNames, values.values);	
 					return stmt.execute(valObj);					

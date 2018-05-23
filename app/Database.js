@@ -259,7 +259,14 @@ Database.prototype.getFieldValues = function(row, fields) {
 			var val = field.parse(row[field.name]);
 			if (val !== val) { 
 				//v is NaN
-				throw new Error("field.parse() failed. for " + field.name + " = '" + row[field.name] + "' [" + row.id + "]");
+				throw new Error(
+					util.format("field.parse() failed. value = '%s', type = %s, row = %d, field = %s"
+						,row[field.name]
+						,field.type
+						,row.id
+						,field.name
+					)
+				);
 			}
 			return val;
 		});
