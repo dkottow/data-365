@@ -91,6 +91,13 @@ AppBase.prototype.start = function(cbAfter) {
   var me = this;
   var path = Donkeylift.util.getParameterByName('path');
 
+       //add d365_database to links
+  if (path) {
+    $('.nav-d365').each(function() {
+      $(this).attr('href', $(this).attr('href') + '?path=' + path);
+    });
+  }
+  
   me.getSchemas(function() {
     if (path) {
       me.setSchema(path, cbAfter);
