@@ -259,7 +259,14 @@ Database.prototype.getFieldValues = function(row, fields) {
 			var val = field.parse(row[field.name]);
 			if (val !== val) { 
 				//v is NaN
-				throw new Error("field.parse() failed. for " + field.name + " = '" + row[field.name] + "' [" + row.id + "]");
+				throw new Error(
+					util.format("field.parse() failed. value = '%s', type = %s, field = %s%s"
+						,row[field.name]
+						,field.type
+						,field.name
+						,(row.id == null) ? '' : ', id = ' + row.id  
+					)
+				);
 			}
 			return val;
 		});
@@ -435,12 +442,13 @@ Database.prototype.allSQL = function(tableName, options) {
 	return sql;	
 }
 
-Database.prototype.parseCSV = function(filename, cbResult) {
+Database.prototype.parseCSV = function(filename, options, cbResult) {
 	Papa.parse(fs.createReadStream(filename), {
 		header: true,
+		delimiter: options.delimiter || "",
 		complete: function(results, file) {
 			if (results.errors.length > 0) {
-				cbResult(new Error('Parsing failed'), results);
+				cbResult(new Error('CSV Error:'), results);
 			} else {
 				cbResult(null, results);
 			}
@@ -480,7 +488,7 @@ Database.prototype._upsertCSVRows = function(action, tableName, csvPath, options
 		changeLog.id = result.rows[0].id;
 
 		//async update or insert into csv file into db
-		me.parseCSV(csvPath, function(err, result) {
+		me.parseCSV(csvPath, options.parser, function(err, result) {
 			if (err) {
 				if (result) {
 					err = new Error(err.message + ' ' + JSON.stringify(result.errors.slice(0,10)));
@@ -508,7 +516,7 @@ Database.prototype._upsertCSVRows = function(action, tableName, csvPath, options
 				me.insert(tableName, result.data, opts, function(err, result) {
 					if (err) {
 						log.error({err: err}, 'Database.upsertCSVFile');						
-						var err = new Error('Insert failed ' + err.message);
+						var err = new Error('Insert ' + err.message);
 						me._updateChangelog(changeLog.id, err);	
 						return;
 					}
@@ -519,7 +527,7 @@ Database.prototype._upsertCSVRows = function(action, tableName, csvPath, options
 				me.update(tableName, result.data, opts, function(err, result) {
 					if (err) {
 						log.error({err: err}, 'Database.upsertCSVFile');						
-						var err = new Error('Update failed ' + err.message);
+						var err = new Error('Update ' + err.message);
 						me._updateChangelog(changeLog.id, err);	
 						return;
 					}
