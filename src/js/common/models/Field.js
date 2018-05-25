@@ -128,8 +128,9 @@ Donkeylift.Field = Backbone.Model.extend({
 			resultError = isNaN(result); 
 
 		} else if(t == Donkeylift.Field.TYPES.date) {
-			//return new Date(val);
-			result = new Date(val.substr(0,4), val.substr(5,2) -1, val.substr(8,2));
+			//dont parse, leave as yyyy-mm-dd string
+			result = val.substr(0,4) + '-' + val.substr(5,2) + '-' + val.substr(8,2);
+			//result = new Date(val.substr(0,4), val.substr(5,2) -1, val.substr(8,2));
 			resultError = isNaN(Date.parse(val)); 
 			//if ( ! resultError) result = result.toISOString().substr(0,10);
 
@@ -169,7 +170,8 @@ Donkeylift.Field = Backbone.Model.extend({
 			return val.toFixed(this.getProp('scale'));
 		} else if (t == 'date') {
 			if (Donkeylift.app.schema.localizeDatetime()) {
-				return this.parse(val).toLocaleDateString(navigator.language);
+				var d = new Date(val.substr(0,4), val.substr(5,2) -1, val.substr(8,2));
+				return d.toLocaleDateString(navigator.language);
 			} else {
 				//JSON - Date ISO string
 				return this.parse(val).toISOString().substr(0,10);
