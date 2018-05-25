@@ -173,8 +173,8 @@ Donkeylift.Field = Backbone.Model.extend({
 				var d = new Date(val.substr(0,4), val.substr(5,2) -1, val.substr(8,2));
 				return d.toLocaleDateString(navigator.language);
 			} else {
-				//JSON - Date ISO string
-				return this.parse(val).toISOString().substr(0,10);
+				//truncate eventual time portion
+				return val.substring(0,10);
 			}
 		} else if (t == 'timestamp') {
 			if (Donkeylift.app.schema.localizeDatetime()) {
