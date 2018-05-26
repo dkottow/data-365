@@ -73,7 +73,10 @@ Donkeylift.Field = Backbone.Model.extend({
 	visible: function() {
 		var visible = this.getProp('visible');
 		if (visible === undefined) {
-			visible = this.get('name')[0] != '_';	
+			visible = !	(
+				this.get('name')[0] == '_' || 
+				_.contains(Donkeylift.Table.INITHIDE_FIELDS, this.get('name'))
+			);	
 		}  
 		return visible;
 	},
