@@ -225,8 +225,10 @@ Schema.prototype.systemRows = function() {
 	var propertyRows = this.systemPropertyRows(); //includes table and field props
 
 	var result = SchemaDefs.SYSTEM_ROWS;
-	result[SchemaDefs.PROPERTIES_TABLE] = propertyRows;
-	
+	result.push({
+		table: SchemaDefs.PROPERTIES_TABLE,
+		rows: propertyRows
+	}); 
 	return result;
 }
 

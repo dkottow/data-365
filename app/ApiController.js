@@ -246,7 +246,7 @@ Controller.prototype.listAccounts = function(req, res) {
 		});
 	
 		result.login = me.getLoginInfo(req);
-		result.version = pkgjson.version;
+		result.version = me.version();
 
 		res.send(result);
 		log.info({req: req}, '...Controller.listAccounts()');
@@ -413,6 +413,7 @@ Controller.prototype.putDatabase = function(req, res) {
 
 		var schema = req.body;
 		schema.name = req.params[1];
+		schema.version = me.version();
 		//TODO Schema.setAdmin(schema, req.user.name);
 	
 		data.account.createDatabase(schema, function(err, db) {
@@ -1140,7 +1141,7 @@ Controller.prototype.account = function(name) {
 }
 
 Controller.prototype.version = function() {
-	return this._version;
+	return pkgjson.version;
 }
 
 Controller.prototype.getLoginInfo = function(req) {
