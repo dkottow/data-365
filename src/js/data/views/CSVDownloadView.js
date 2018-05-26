@@ -34,7 +34,9 @@ Donkeylift.CSVDownloadView = Backbone.View.extend({
 
 	evGenerateCSVClick: function() {
 		var fieldNames = $('#modalCSVSelectFields').val();
-        this.model.generateCSV(fieldNames, function(err, link) {
+		var options = {};
+		options.delimiter = $('#modalCSVFieldDelimiter').val();
+        this.model.generateCSV(fieldNames, options, function(err, link) {
 			if (link) {
 				console.log('CSV link ' + link);
 				$('#modalCSVDownloadLink').attr('href', link);

@@ -375,13 +375,24 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 		});
 	},
 
-	generateCSV : function(fields, cbResult) {
+	generateCSV : function(fields, options, cbResult) {
 		var me = this;
+		options = options || {};
+
+		var delimiter;
+		if (options.delimiter == "\\t") {
+			delimiter = '%09';
+		} else {
+			delimiter = encodeURI(options.delimiter);
+		}
+
 		if ( ! this.lastFilterQuery || ! fields || ! fields.length) return;
 
 		var q = '$select=' + fields.join(',')
 			+ '&' + '$orderby=' + this.lastFilterQuery.order.join(',')
-			+ '&' + this.lastFilterQuery.filters.toParam();
+			+ '&' + this.lastFilterQuery.filters.toParam()
+			+ '&' + 'delimiter=' + delimiter;
+
 
 		var path = this.get('url') + CSV_EXT + '?' + q;
 		var url = Donkeylift.env.server + this.get('url') + '.nonce';

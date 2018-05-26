@@ -93,6 +93,10 @@ body {
 	margin-right: 1em;
 }
 
+#modalCSVFieldDelimiter {
+	width: 3em;
+}
+
 .navbar-header {
 	/* margin-left: -1em !important; */
 	/* margin-right: 1em !important; */

@@ -17,8 +17,11 @@
 var _ = require('underscore');
 
 var util = require('util');
-var Papa = require('papaparse');
 var fs = require('fs');
+
+
+//var Papa = require('papaparse');
+var Papa = require('./papaparse.js'); //local has ISO dates
 
 var Table = require('./Table.js').Table;
 var Schema = require('./Schema.js').Schema;
@@ -563,7 +566,7 @@ Database.prototype.upsertChangelog = function(row, cbAfter) {
 
 
 Database.prototype.allResult = function(tableName, rows, countRows, sql, options) {
-
+	log.debug({options: options}, 'Database.allResult');
 	var opts = this.allSanitizeOptions(options);		
 
 	var query = {
