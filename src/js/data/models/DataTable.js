@@ -401,13 +401,13 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 			contentType:'application/json; charset=utf-8',
 			dataType: 'json'
 
-		}).then(function(result) {
+		}).then((result) => {
 			var response = result.response;
 			var link = this.fullUrl(CSV_EXT) + '?nonce=' + response.nonce;
 			cbResult(null, link);
 			console.log(response);
 
-		}).catch(function(result) {
+		}).catch((result) => {
 			console.log("Error requesting " + url);
 			var err = new Error(result.jqXHR.responseText);
 			console.log(err);
@@ -425,13 +425,13 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 			contentType:'application/json; charset=utf-8',
 			dataType: 'json'
 
-		}).then(function(result) {
+		}).then((result) => {
 			var response = result.response;
 			var link = this.fullUrl(CSV_EXT) + '?nonce=' + response.nonce;
 			cbResult(null, link);
 			console.log(response);
 
-		}).catch(function(result) {
+		}).catch((result) => {
 			console.log("Error requesting " + url);
 			var err = new Error(result.jqXHR.responseText);
 			console.log(err);
