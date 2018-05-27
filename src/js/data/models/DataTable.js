@@ -393,7 +393,7 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 			+ '&' + 'delimiter=' + delimiter;
 
 		var path = this.get('url') + CSV_EXT + '?' + q;
-		var url = this.fullUrl(NONCE_EXT) + '?' + q;
+		var url = this.fullUrl(NONCE_EXT);
 
 		Donkeylift.ajax(url, {
 			type: 'POST',
