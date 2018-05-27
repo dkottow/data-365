@@ -4,6 +4,7 @@ var ROWS_EXT = '.rows';
 var STATS_EXT = '.stats';
 var CHOWN_EXT = '.chown';
 var CSV_EXT = '.csv';
+var NONCE_EXT = '.nonce';
 
 Donkeylift.DataTable = Donkeylift.Table.extend({
 
@@ -357,14 +358,12 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 			+ '&' + 'nocounts=1';
 
 		var url = this.fullUrl() + '?' + q;
-		console.log(url);
+		console.log('getRowsAsCSV ' + url);
 
 		Donkeylift.ajax(url, {
 
 		}).then(function(result) {
-			var response = result.response;
-			me.dataCache[url] = response;
-			cbResult(response);
+			cbResult(result.response);
 
 		}).catch(function(result) {
 			console.log("Error requesting " + url);
@@ -393,9 +392,8 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 			+ '&' + this.lastFilterQuery.filters.toParam()
 			+ '&' + 'delimiter=' + delimiter;
 
-
 		var path = this.get('url') + CSV_EXT + '?' + q;
-		var url = Donkeylift.env.server + this.get('url') + '.nonce';
+		var url = this.fullUrl(NONCE_EXT) + '?' + q;
 
 		Donkeylift.ajax(url, {
 			type: 'POST',
@@ -405,7 +403,7 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 
 		}).then(function(result) {
 			var response = result.response;
-			var link = Donkeylift.env.server + me.get('url') + CSV_EXT + '?nonce=' + response.nonce;
+			var link = this.fullUrl(CSV_EXT) + '?nonce=' + response.nonce;
 			cbResult(null, link);
 			console.log(response);
 
@@ -417,7 +415,31 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 			cbResult(err);
 		});
 	},
-	
+
+	uploadCSV : function(file, options, cbResult) {
+		var url = this.fullUrl(CSV_EXT) + '?' + q;
+
+		Donkeylift.ajax(url, {
+			type: 'POST',
+			data: JSON.stringify({ path: path }),
+			contentType:'application/json; charset=utf-8',
+			dataType: 'json'
+
+		}).then(function(result) {
+			var response = result.response;
+			var link = this.fullUrl(CSV_EXT) + '?nonce=' + response.nonce;
+			cbResult(null, link);
+			console.log(response);
+
+		}).catch(function(result) {
+			console.log("Error requesting " + url);
+			var err = new Error(result.jqXHR.responseText);
+			console.log(err);
+			alert(err.message);
+			cbResult(err);
+		});
+	},
+
 	skipRowCounts: function() {
 		return this.getProp('skip_row_counts') === true;
 	},

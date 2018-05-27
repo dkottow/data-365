@@ -18,7 +18,9 @@ Donkeylift.CSVDownloadView = Backbone.View.extend({
 		el.empty();
 
 		Donkeylift.app.addAncestorFieldsToSelect(el);
-		var fieldNames = this.model.get('fields').map(function(f) {
+		var fieldNames = this.model.get('fields').filter(function (f) {
+			return ! _.contains(Donkeylift.Table.SYSTEM_FIELDS, f.get('name'));
+		}).map(function(f) {
 			return this.model.getFieldQN(f);
 		}, this);
 		$('#modalCSVSelectFields').val(fieldNames);

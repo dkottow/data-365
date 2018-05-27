@@ -73,9 +73,10 @@ Donkeylift.Field = Backbone.Model.extend({
 	visible: function() {
 		var visible = this.getProp('visible');
 		if (visible === undefined) {
+			//hide if system field or name starts with _ 
 			visible = !	(
 				this.get('name')[0] == '_' || 
-				_.contains(Donkeylift.Table.INITHIDE_FIELDS, this.get('name'))
+				_.contains(Donkeylift.Table.SYSTEM_FIELDS, this.get('name'))
 			);	
 		}  
 		return visible;
