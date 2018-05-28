@@ -19,5 +19,30 @@ Donkeylift.Database = Donkeylift.Schema.extend({
 
 	localizeDatetime: function() {
 		return this.getProp('localize_datetime');		
+	},
+
+	getChangelog : function(id, cbResult) {
+		var url = this.url() + '/' + Donkeylift.Changelog.TABLE
+			+ '?' + '$filter=id eq ' + id; 
+
+		Donkeylift.ajax(url, {
+			cache: false
+
+		}).then(function(result) {
+			console.log('getChangelog', result.response);
+			var changelog = result.response.rows[0];
+			changelog.Metadata = JSON.parse(changelog.Metadata);
+			cbResult(null, changelog);
+			
+		}).catch((result) => {
+			console.log("Error requesting " + url);
+			var err = new Error(result.jqXHR.responseText);
+			console.log(err);
+			alert(err.message);
+			cbResult(err);
+		});
 	}
 });		
+
+Donkeylift.Changelog = {};
+Donkeylift.Changelog.TABLE = '_d365Changelog';

@@ -10,6 +10,7 @@ Donkeylift.MenuDataView = Backbone.View.extend({
 		'click #selection-chown': 'evSelectionChangeOwner',
 		'click #csv-copy': 'evCSVCopy',
 		'click #csv-download': 'evCSVDownload',
+		'click #csv-upload': 'evCSVUpload',
 		'click #edit-prefs': 'evEditPrefs',
 	},
 
@@ -17,6 +18,7 @@ Donkeylift.MenuDataView = Backbone.View.extend({
 		console.log("MenuView.init");
 		this.listenTo(opts.app.selectedRows, 'update', this.updateSelectionLabel);
 		this.listenTo(opts.app.selectedRows, 'reset', this.updateSelectionLabel);
+		this.views = {};
 	},
 
 	template: _.template($('#data-menu-template').html()),
@@ -112,7 +114,7 @@ Donkeylift.MenuDataView = Backbone.View.extend({
 	
 	evCSVCopy: function() {
 		var table = Donkeylift.app.table;
-		table.getRowsAsCSV(function(result) {
+		table.getRowsAsCSV(function(err, result) {
 			console.log(result);
 			$('#csv-textarea').val(result);
 			$('#modalCSVShow').modal();
@@ -135,6 +137,22 @@ Donkeylift.MenuDataView = Backbone.View.extend({
 		modal.render();
 	},
 
+	getCSVUploadView: function() {
+		if ( ! this.csvUploadView) {
+			this.csvUploadView = new Donkeylift.CSVUploadView({ 
+				model: Donkeylift.app.table 
+			});
+		} else {
+			this.csvUploadView.model = Donkeylift.app.table;
+		}
+		return this.csvUploadView;
+	},
+
+	evCSVUpload: function() {
+		var modal = this.getCSVUploadView();
+		modal.render();
+	},
+	
 	getPreferencesView: function() {
 		var prefs = new Donkeylift.Preferences({
 			schema: Donkeylift.app.schema,
@@ -154,8 +172,7 @@ Donkeylift.MenuDataView = Backbone.View.extend({
 		//TODO
 		var modal = this.getPreferencesView();
 		modal.render();
-	}
-
+	}	
 });
 
 

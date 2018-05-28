@@ -171,7 +171,8 @@ AccessControl.prototype.authorize = function(op, req, path) {
 				}
 				return;						
 							
-			case 'chownRows':			
+			case 'chownRows':
+			case 'postCSVFile':			
 				var granted = access.Write == Table.ROW_SCOPES.ALL;
 				if (granted) {
 					return resolveFn(access, 'user has ' + access.Write + ' write access to ' + scope.table);
@@ -270,8 +271,8 @@ AccessControl.prototype.createNonce = function(op, cbResult) {
 	return new Promise(function(resolve, reject) {
 
 		if (me.supportsNonce(op)) {
-			var nonce = me.getRandomFilename('nonce');
-			var path = me.getTempPath(nonce);
+			var nonce = me.getRandomFilename();
+			var path = me.getTempPath(nonce, 'nonce');
 			fs.open(path, "w", function (err, fd) {
 				if (err) {
 					reject(err);
@@ -289,14 +290,14 @@ AccessControl.prototype.createNonce = function(op, cbResult) {
 }
 
 AccessControl.prototype.checkNonce = function(nonce) {
-	return this.deleteNonceFile(nonce, "nonce");
+	return this.deleteNonceFile(nonce);
 }
 
-AccessControl.prototype.deleteNonceFile = function(nonce, ext) {
+AccessControl.prototype.deleteNonceFile = function(nonce) {
 	var me = this;
 	return new Promise(function(resolve, reject) {
 
-		fs.unlink(me.getTempPath(nonce, ext), function(err) {
+		fs.unlink(me.getTempPath(nonce, "nonce"), function(err) {
 			if (err) {
 				log.error({ err: err, nonce: nonce }, 'AccessControl.deleteNonceFile');
 				var err = new Error('invalid nonce');

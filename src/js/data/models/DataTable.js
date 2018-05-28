@@ -4,6 +4,7 @@ var ROWS_EXT = '.rows';
 var STATS_EXT = '.stats';
 var CHOWN_EXT = '.chown';
 var CSV_EXT = '.csv';
+var NONCE_EXT = '.nonce';
 
 Donkeylift.DataTable = Donkeylift.Table.extend({
 
@@ -357,48 +358,14 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 			+ '&' + 'nocounts=1';
 
 		var url = this.fullUrl() + '?' + q;
-		console.log(url);
+		console.log('getRowsAsCSV ' + url);
 
 		Donkeylift.ajax(url, {
 
 		}).then(function(result) {
-			var response = result.response;
-			me.dataCache[url] = response;
-			cbResult(response);
+			cbResult(null, result.response);
 
-		}).catch(function(result) {
-			console.log("Error requesting " + url);
-			var err = new Error(result.jqXHR.responseText);
-			console.log(err);
-			alert(err.message);
-			cbResult();
-		});
-	},
-
-	generateCSV : function(fields, cbResult) {
-		var me = this;
-		if ( ! this.lastFilterQuery || ! fields || ! fields.length) return;
-
-		var q = '$select=' + fields.join(',')
-			+ '&' + '$orderby=' + this.lastFilterQuery.order.join(',')
-			+ '&' + this.lastFilterQuery.filters.toParam();
-
-		var path = this.get('url') + CSV_EXT + '?' + q;
-		var url = Donkeylift.env.server + this.get('url') + '.nonce';
-
-		Donkeylift.ajax(url, {
-			type: 'POST',
-			data: JSON.stringify({ path: path }),
-			contentType:'application/json; charset=utf-8',
-			dataType: 'json'
-
-		}).then(function(result) {
-			var response = result.response;
-			var link = Donkeylift.env.server + me.get('url') + CSV_EXT + '?nonce=' + response.nonce;
-			cbResult(null, link);
-			console.log(response);
-
-		}).catch(function(result) {
+		}).catch((result) => {
 			console.log("Error requesting " + url);
 			var err = new Error(result.jqXHR.responseText);
 			console.log(err);
@@ -406,7 +373,83 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 			cbResult(err);
 		});
 	},
-	
+
+	encodeDelimiter: function(delimiter) {
+		if ( ! delimiter) {
+			return delimiter;
+		} else if (delimiter == "\\t") {
+			return '%09';
+		} else {
+			return encodeURI(delimiter);
+		}
+	},
+
+	generateCSV : function(fields, options, cbResult) {
+		var me = this;
+		options = options || {};
+
+		if ( ! this.lastFilterQuery || ! fields || ! fields.length) return;
+
+		var q = '$select=' + fields.join(',')
+			+ '&' + '$orderby=' + this.lastFilterQuery.order.join(',')
+			+ '&' + this.lastFilterQuery.filters.toParam()
+			+ '&' + 'delimiter=' + this.encodeDelimiter(options.delimiter);
+
+		var path = this.get('url') + CSV_EXT + '?' + q;
+		var url = this.fullUrl(NONCE_EXT);
+
+		Donkeylift.ajax(url, {
+			type: 'POST',
+			data: JSON.stringify({ path: path }),
+			contentType:'application/json; charset=utf-8',
+			dataType: 'json'
+
+		}).then((result) => {
+			var response = result.response;
+			var link = this.fullUrl(CSV_EXT) + '?nonce=' + response.nonce;
+			cbResult(null, link);
+			console.log(response);
+
+		}).catch((result) => {
+			console.log("Error requesting " + url);
+			var err = new Error(result.jqXHR.responseText);
+			console.log(err);
+			alert(err.message);
+			cbResult(err);
+		});
+	},
+
+	uploadCSV : function(file, options, cbResult) {
+		var me = this;
+		options = options || {};
+		var q = 'delimiter=' + this.encodeDelimiter(options.delimiter);
+
+		var url = this.fullUrl(CSV_EXT) + '?' + q;
+		console.log('uploading..', file);
+
+		var formData = new FormData();
+		formData.append('csv', file, file.name);
+
+		Donkeylift.ajax(url, {
+			type: 'POST',
+			data: formData,
+			processData: false,
+			contentType: false,
+			dataType: 'json'
+
+		}).then((result) => {
+			console.log('uploadCSV', result.response);
+			cbResult(null, result.response.changelog);
+
+		}).catch((result) => {
+			console.log("Error requesting " + url);
+			var err = new Error(result.jqXHR.responseText);
+			console.log(err);
+			alert(err.message);
+			cbResult(err);
+		});
+	},
+
 	skipRowCounts: function() {
 		return this.getProp('skip_row_counts') === true;
 	},

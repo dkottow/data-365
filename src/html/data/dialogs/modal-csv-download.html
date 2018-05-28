@@ -8,11 +8,16 @@
 	  <div class="modal-body">
 		<form>
 		  <div class="form-group">
-			<label for="modalCSVSelectFields" class="control-label">Select Fields:</label>
-			<select id="modalCSVSelectFields" multiple class="form-control selectpicker" data-actions-box="true">
-			</select>
+				<label for="modalCSVSelectFields" class="control-label">Select Fields:</label>
+				<select id="modalCSVSelectFields" multiple class="form-control selectpicker" data-actions-box="true">
+				</select>
 		  </div>
-		</form>
+			<div class="form-group">
+				<label for="modalCSVDownloadFieldDelimiter" class="control-label">Field delimiter:</label>
+				<input type="text" value="," class="form-control field-delimiter-input" id="modalCSVDownloadFieldDelimiter">
+				<small>Single character, enter \t for tab</small>
+			</div>
+			</form>
 	  </div>
 	  <div class="modal-footer">
   		<button id="modalCSVGenerate" type="button" class="btn btn-primary">Generate</button>

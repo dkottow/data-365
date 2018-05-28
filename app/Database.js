@@ -17,8 +17,11 @@
 var _ = require('underscore');
 
 var util = require('util');
-var Papa = require('papaparse');
 var fs = require('fs');
+
+
+//var Papa = require('papaparse');
+var Papa = require('./papaparse.js'); //local has ISO dates
 
 var Table = require('./Table.js').Table;
 var Schema = require('./Schema.js').Schema;
@@ -473,7 +476,7 @@ Database.prototype._upsertCSVRows = function(action, tableName, csvPath, options
 		Action: action,
 		Path: options.path, 
 		User: options.user.name(),
-		Metadata: JSON.stringify(options.metadata)
+		Metadata: options.metadata
 	};
 	
 	var table = this.table(tableName);
@@ -520,6 +523,7 @@ Database.prototype._upsertCSVRows = function(action, tableName, csvPath, options
 						changeLog.ResultDetails = 'SQL Insert ' + err.message;
 					} else {
 						changeLog.Result = 'success';						
+						changeLog.Metadata.rows = result.rows.length; 
 					}
 					me.upsertChangelog(changeLog);	
 					log.debug('...Database.insertCSVFile().');	
@@ -532,6 +536,7 @@ Database.prototype._upsertCSVRows = function(action, tableName, csvPath, options
 						changeLog.ResultDetails = 'SQL Update ' + err.message;
 					} else {
 						changeLog.Result = 'success';						
+						changeLog.Metadata.rows = result.rows.length; 
 					}
 					me.upsertChangelog(changeLog);	
 					log.debug('...Database.upsertCSVFile().');	
@@ -545,25 +550,27 @@ Database.prototype._upsertCSVRows = function(action, tableName, csvPath, options
 	});
 }
 
-Database.prototype.upsertChangelog = function(row, cbAfter) {
-	log.debug({row: row}, 'Database.upsertChangelog');
+Database.prototype.upsertChangelog = function(changelog, cbAfter) {
+	log.debug({row: row}, 'Database.upsertChangelog'); 
+	var row = _.clone(changelog);
 	row.own_by = User.SYSTEM;
+	row.Metadata = JSON.stringify(row.Metadata);
 	if (row.id) {
-		this.update(SchemaDefs.CHANGELOG_TABLE, [ row ], function(err) {
+		this.update(SchemaDefs.CHANGELOG_TABLE, [ row ], function(err, result) {
 			if (err) log.error({ err: err }, 'upsertChangelog Database.insertCSVFile');	
-			if (cbAfter) cbAfter(err);
+			if (cbAfter) cbAfter(err, result);
 		});	
 	} else {
-		this.insert(SchemaDefs.CHANGELOG_TABLE, [ row ], function(err) {
+		this.insert(SchemaDefs.CHANGELOG_TABLE, [ row ], function(err, result) {
 			if (err) log.error({ err: err }, 'upsertChangelog Database.insertCSVFile');				
-			if (cbAfter) cbAfter(err);
+			if (cbAfter) cbAfter(err, result);
 		});	
 	}
 }
 
 
 Database.prototype.allResult = function(tableName, rows, countRows, sql, options) {
-
+	log.debug({options: options}, 'Database.allResult');
 	var opts = this.allSanitizeOptions(options);		
 
 	var query = {
