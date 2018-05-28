@@ -4,7 +4,8 @@ Donkeylift.CSVUploadView = Backbone.View.extend({
 	el:  '#modalCSVUpload',
 
 	events: {
-		'click #modalCSVUploadSubmit': 'evUploadCSVClick',
+        'click #modalCSVUploadSubmit': 'evUploadCSVClick',
+        'click button.close': 'evCloseClick'
 	},
 
 	initialize: function() {
@@ -68,10 +69,14 @@ Donkeylift.CSVUploadView = Backbone.View.extend({
                 console.log('evUploadCSVClick', err, result);
                 if (err) return;
 
-                me.checkChangelog(result.id, 3000);
+                me.checkChangelog(result.id, 2000);
             });
         }
 	},
+
+    evCloseClick: function() {
+        clearInterval(this.checkFn);
+    }
 
 });
 
