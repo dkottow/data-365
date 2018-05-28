@@ -363,34 +363,37 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 		Donkeylift.ajax(url, {
 
 		}).then(function(result) {
-			cbResult(result.response);
+			cbResult(null, result.response);
 
-		}).catch(function(result) {
+		}).catch((result) => {
 			console.log("Error requesting " + url);
 			var err = new Error(result.jqXHR.responseText);
 			console.log(err);
 			alert(err.message);
-			cbResult();
+			cbResult(err);
 		});
+	},
+
+	encodeDelimiter: function(delimiter) {
+		if ( ! delimiter) {
+			return delimiter;
+		} else if (delimiter == "\\t") {
+			return '%09';
+		} else {
+			return encodeURI(delimiter);
+		}
 	},
 
 	generateCSV : function(fields, options, cbResult) {
 		var me = this;
 		options = options || {};
 
-		var delimiter;
-		if (options.delimiter == "\\t") {
-			delimiter = '%09';
-		} else {
-			delimiter = encodeURI(options.delimiter);
-		}
-
 		if ( ! this.lastFilterQuery || ! fields || ! fields.length) return;
 
 		var q = '$select=' + fields.join(',')
 			+ '&' + '$orderby=' + this.lastFilterQuery.order.join(',')
 			+ '&' + this.lastFilterQuery.filters.toParam()
-			+ '&' + 'delimiter=' + delimiter;
+			+ '&' + 'delimiter=' + this.encodeDelimiter(options.delimiter);
 
 		var path = this.get('url') + CSV_EXT + '?' + q;
 		var url = this.fullUrl(NONCE_EXT);
@@ -417,19 +420,26 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 	},
 
 	uploadCSV : function(file, options, cbResult) {
+		var me = this;
+		options = options || {};
+		var q = 'delimiter=' + this.encodeDelimiter(options.delimiter);
+
 		var url = this.fullUrl(CSV_EXT) + '?' + q;
+		console.log('uploading..', file);
+
+		var formData = new FormData();
+		formData.append('csv', file, file.name);
 
 		Donkeylift.ajax(url, {
 			type: 'POST',
-			data: JSON.stringify({ path: path }),
-			contentType:'application/json; charset=utf-8',
+			data: formData,
+			processData: false,
+			contentType: false,
 			dataType: 'json'
 
 		}).then((result) => {
-			var response = result.response;
-			var link = this.fullUrl(CSV_EXT) + '?nonce=' + response.nonce;
-			cbResult(null, link);
-			console.log(response);
+			console.log('uploadCSV', result.response);
+			cbResult(null, result.response.changelog);
 
 		}).catch((result) => {
 			console.log("Error requesting " + url);
