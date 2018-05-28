@@ -171,7 +171,8 @@ AccessControl.prototype.authorize = function(op, req, path) {
 				}
 				return;						
 							
-			case 'chownRows':			
+			case 'chownRows':
+			case 'postCSVFile':			
 				var granted = access.Write == Table.ROW_SCOPES.ALL;
 				if (granted) {
 					return resolveFn(access, 'user has ' + access.Write + ' write access to ' + scope.table);

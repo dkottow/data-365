@@ -79,8 +79,9 @@ Controller.prototype._getAuthHandler = function(options) {
 	};
 
 	return function(req, res, next) {
+		log.debug({req: req}, 'Controller.auth()...');
 
-		if (isNonceRoute(req.path)) {
+		if (req.method == 'GET' && isNonceRoute(req.path)) {
 			log.debug({path: req.path}, 'Nonce request.. pass through');
 			next();
 			return;
