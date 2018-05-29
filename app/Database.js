@@ -213,7 +213,7 @@ Database.prototype.rowsOwned = function(tableName, rowIds, principal, cbResult) 
 Database.prototype.getInsertFields = function(rows, table) {
 
 	var noId = _.find(rows, function(row) {
-		return ! _.isNumber(row.id);
+		return isNaN(parseInt(row.id));
 	});
 
 	var fields = _.clone(table.fields());
