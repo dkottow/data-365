@@ -614,7 +614,7 @@ Controller.prototype.ingestCSVFile = function(req, data, cbResult) {
 	log.debug({ req: req }, 'Controller.ingestCSVFile()...');
 
 	var metadata = {
-		serverFile: path.basename(req.file.filename),
+		//serverFile: path.basename(req.file.filename),
 		clientFile: req.file.originalname, 
 		size: req.file.size,
 	};

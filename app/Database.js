@@ -494,8 +494,10 @@ Database.prototype._upsertCSVRows = function(action, tableName, csvPath, options
 
 		changeLog.id = result.rows[0].id;
 
-		//async update or insert into csv file into db
+		//async update or insert rows from csv file into db
 		me.parseCSV(csvPath, options.parser, function(err, result) {
+			fs.unlink(csvPath); //delete csv file on server
+
 			if (err) {
 				changeLog.Result = 'error';
 				changeLog.ResultDetails = err.message + ' ' + JSON.stringify(result.errors.slice(0,3)) //limit to max 3..
