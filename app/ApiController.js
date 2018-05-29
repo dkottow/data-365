@@ -543,6 +543,10 @@ Controller.prototype.postCSVFile = function(req, res) {
 	}).then((access) => { 
 		log.debug({file: req.file}, 'Controller.postCSVFile()');
 		me.ingestCSVFile(req, data, function(err, changeLog) {
+			if (err) {
+				me.sendError(req, res, err);
+				return;
+			}
 			var result = { changelog: changeLog };
 			result.login = me.getLoginInfo(req);	
 			res.send(result);

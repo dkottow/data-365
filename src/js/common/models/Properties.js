@@ -68,8 +68,7 @@ Donkeylift.Properties = Backbone.Collection.extend({
 
 		}).catch(function(result) {
 			console.log("Error requesting " + url);
-			var err = new Error(result.jqXHR.responseText);
-			console.log(err);
+			Donkeylift.app.showException(result);
 			if (options.error) options.error.call(options.context, err);
 		});
 

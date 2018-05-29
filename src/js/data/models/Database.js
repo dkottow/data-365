@@ -35,10 +35,7 @@ Donkeylift.Database = Donkeylift.Schema.extend({
 			cbResult(null, changelog);
 			
 		}).catch((result) => {
-			console.log("Error requesting " + url);
-			var err = new Error(result.jqXHR.responseText);
-			console.log(err);
-			alert(err.message);
+			Donkeylift.app.showException(result, { url: url });
 			cbResult(err);
 		});
 	}

@@ -127,6 +127,11 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 		}
 	},
 
+	paramsToQS: function(params) {
+		var q = _.map(params, function(v,k) { return k + "=" + v; }).join('&');
+		return q;
+	},
+
 	ajaxGetRowsFn: function() {
 		var me = this;
 		return function(query, callback, settings) {
@@ -165,10 +170,7 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 				});
 			}			
 
-			var q = _.map(params, function(v, k) {
-				return k + '=' + v;
-			}).join('&');
-			q = q + '&' + filters.toParam();
+			var q = me.paramsToQS(params) + '&' + filters.toParam();
 
 			var url = me.fullUrl() + '?' + q;
 			console.log(url);
@@ -222,10 +224,7 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 
 				callback(data);
 			}).catch(function(result) {
-				console.log("Error requesting " + url);
-				var err = new Error(result.jqXHR.responseText);
-				console.log(err);
-				alert(err.message);
+				Donkeylift.app.showException(result, { url: url });
 			});
 		}
 	},
@@ -246,12 +245,8 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 		var fieldName = filter.get('field').vname();
 
 		var params = { '$select' : fieldName };
-
-		var q = _.map(params, function(v,k) { return k + "=" + v; })
-				.join('&');
-
 		var filters = Donkeylift.app.filters.apply(filter);
-		q = q + '&' + Donkeylift.Filters.toParam(filters);
+		var q = me.paramsToQS(params) + '&' + Donkeylift.Filters.toParam(filters);
 
 		var url = me.fullUrl(STATS_EXT) + '?' + q;
 
@@ -271,10 +266,7 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 				callback(response[fieldName]);
 
 			}).catch(function(result) {
-				console.log("Error requesting " + url);
-				var err = new Error(result.jqXHR.responseText);
-				console.log(err);
-				alert(err.message);
+				Donkeylift.app.showException(result, { url: url });
 			});
 		}
 	},
@@ -290,11 +282,8 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 			'$orderby': fieldName
 		};
 
-		var q = _.map(params, function(v,k) { return k + "=" + encodeURIComponent(v); })
-				.join('&');
-
 		var filters = Donkeylift.app.filters.apply(filter, searchTerm);
-		q = q + '&' + Donkeylift.Filters.toParam(filters);
+		var q = me.paramsToQS(params) + '&' + Donkeylift.Filters.toParam(filters);
 
 		var url = this.fullUrl() + '?' + q;
 
@@ -315,10 +304,7 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 				callback(response.rows);
 
 			}).catch(function(result) {
-				console.log("Error requesting " + url);
-				var err = new Error(result.jqXHR.responseText);
-				console.log(err);
-				alert(err.message);
+				Donkeylift.app.showException(result, { url: url });
 			});
 		}
 	},
@@ -340,10 +326,7 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 			me.reload();
 
 		}).catch(function(result) {
-			console.log("Error requesting " + url);
-			var err = new Error(result.jqXHR.responseText);
-			console.log(err);
-			alert(err.message);
+			Donkeylift.app.showException(result, { url: url });
 		});
 	},
 
@@ -366,10 +349,7 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 			cbResult(null, result.response);
 
 		}).catch((result) => {
-			console.log("Error requesting " + url);
-			var err = new Error(result.jqXHR.responseText);
-			console.log(err);
-			alert(err.message);
+			Donkeylift.app.showException(result, { url: url });
 			cbResult(err);
 		});
 	},
@@ -411,10 +391,7 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 			console.log(response);
 
 		}).catch((result) => {
-			console.log("Error requesting " + url);
-			var err = new Error(result.jqXHR.responseText);
-			console.log(err);
-			alert(err.message);
+			Donkeylift.app.showException(result, { url: url });
 			cbResult(err);
 		});
 	},
@@ -422,8 +399,12 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 	uploadCSV : function(file, options, cbResult) {
 		var me = this;
 		options = options || {};
-		var q = 'delimiter=' + this.encodeDelimiter(options.delimiter);
+		var params = { 
+			delimiter: this.encodeDelimiter(options.delimiter),
+			replace: options.replace
+		};
 
+		var q = me.paramsToQS(params);
 		var url = this.fullUrl(CSV_EXT) + '?' + q;
 		console.log('uploading..', file);
 
@@ -442,11 +423,8 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 			cbResult(null, result.response.changelog);
 
 		}).catch((result) => {
-			console.log("Error requesting " + url);
-			var err = new Error(result.jqXHR.responseText);
-			console.log(err);
-			alert(err.message);
-			cbResult(err);
+			Donkeylift.app.showException(result, { url: url });
+			cbResult(result);
 		});
 	},
 

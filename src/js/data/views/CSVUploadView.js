@@ -55,7 +55,9 @@ Donkeylift.CSVUploadView = Backbone.View.extend({
     },
 
     evCSVFileSelected: function() {
+        this.showResult(false);
         var file = $('#modalCSVUploadFile').prop('files')[0];
+        if ( ! file) return;
         var reader = new FileReader();
         reader.onload = function(ev) {
             var rows = ev.target.result.split(/\r?\n/);
@@ -85,7 +87,6 @@ Donkeylift.CSVUploadView = Backbone.View.extend({
             console.log(rows[0].substr(0, 80) + '\n' + rows[1].substr(0, 80));
         };
         reader.readAsText(file);
-        this.showResult(false);
 	},
    
     checkChangelog: function(changeId, interval) {
@@ -106,7 +107,8 @@ Donkeylift.CSVUploadView = Backbone.View.extend({
         var me = this;
 		var files = $('#modalCSVUploadFile').prop('files');
 		var options = {};
-		options.delimiter = $('#modalCSVUploadFieldDelimiter').val();
+        options.delimiter = $('#modalCSVUploadFieldDelimiter').val();
+        options.replace = $('input[name=modalCSVUploadMode]:checked').val() == 'update' ? 1 : 0;
         if (files.length == 1) {
             this.showResult(true);
             this.model.uploadCSV(files[0], options, function(err, result) {

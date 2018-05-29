@@ -155,11 +155,26 @@ AppBase.prototype.getSchemas = function(cbAfter) {
     } catch(err) { console.log(err); }
     
   }).catch(function(result) {
-    console.log("Error requesting " + url);
-    var err = new Error(result.jqXHR.responseText);
-    console.log(err);
-    alert(err.message);
+    me.showException(result, { url: url });
   });         
+}
+
+AppBase.prototype.showException = function(ex, options) {
+  var err;
+  console.log('showException', ex, options);
+  if ( ! ex) return;
+  if (ex.jqXHR) {
+    err = 'HTTP Error ' + ex.jqXHR.status 
+        + '\n\n' + ex.jqXHR.responseText;
+  } else if (ex instanceof Error) {
+    err = ex.message;
+  } else {
+    err = JSON.stringify(ex);
+  }
+  if (options) {
+    err = err +'\n\n' + JSON.stringify(options);
+  }
+  alert(err);
 }
 
 AppBase.prototype.unsetSchema = function() {
@@ -252,10 +267,7 @@ AppBase.prototype.renderSchemaList = function() {
     } catch(err) { console.log(err); }
 
   }).catch(function(result) {
-    console.log("Error requesting " + url);
-    var err = new Error(result.jqXHR.responseText);
-    console.log(err);
-    alert(err.message);
+    me.showException(result, { url: url });
   });         
 },
 
