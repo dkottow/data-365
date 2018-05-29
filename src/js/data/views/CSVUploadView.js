@@ -6,7 +6,8 @@ Donkeylift.CSVUploadView = Backbone.View.extend({
 	events: {
         'click #modalCSVUploadSubmit': 'evUploadCSVClick',
         'click button.close': 'evCloseClick',
-        'change #modalCSVUploadFile': 'evCSVFileSelected'
+        'change #modalCSVUploadFile': 'evCSVFileSelected',
+        'change input[name=modalCSVUploadMode]': 'evCSVModeChanged'
 	},
 
 	initialize: function() {
@@ -45,25 +46,41 @@ Donkeylift.CSVUploadView = Backbone.View.extend({
         }
     },
 
+    evCSVModeChanged: function() {
+        if ($('input[name=modalCSVUploadMode][value=update]').prop('checked')) {
+            $('.modalCSVUploadMode').toggleClass('text-danger', true);
+        } else {
+            $('.modalCSVUploadMode').toggleClass('text-danger', false);
+        }
+    },
+
     evCSVFileSelected: function() {
         var file = $('#modalCSVUploadFile').prop('files')[0];
         var reader = new FileReader();
         reader.onload = function(ev) {
             var rows = ev.target.result.split(/\r?\n/);
+
             var sizeStr;
             if (file.size < 1e3) sizeStr = file.size + ' bytes';
             else if (file.size < 1e6) sizeStr = (file.size / 1e3).toFixed(1) + ' kB';
             else sizeStr = (file.size / 1e6).toFixed(1) + ' MB';
+
+            var lastModifiedStr;
+
             $('.modalCSVUploadFileInfo div').html(
                   file.name 
                 + ' (' + file.type + ')' 
                 + ' <br>' + sizeStr 
                 + ' ' + rows.length + ' rows'
             );
-            $('.modalCSVUploadFileInfo small').html(
-                  '<br><b>' + rows[0].substr(0, 80) + '</b>'  
+            
+            var previewStr = '<b>Failed</b>';
+
+            if (rows && rows.length > 1) {
+                previewStr = '<b>' + rows[0].substr(0, 80) + '</b>'  
                 + '<br>' + rows[1].substr(0, 80)
-            );
+            }
+            $('.modalCSVUploadFileInfo small').html(previewStr);
             console.log(file, rows.length);
             console.log(rows[0].substr(0, 80) + '\n' + rows[1].substr(0, 80));
         };

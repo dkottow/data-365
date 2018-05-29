@@ -12,16 +12,26 @@
 				<input id="modalCSVUploadFile" type="file" name="csv" class="form-control-file">
 				</select>
 		  </div>
+			<div class="form-group modalCSVUploadFileInfo">
+				<label class="control-label">File info:</label>
+				<div></div>
+				<label class="control-label">Preview:</label>
+				<br><small></small>
+			</div>
 			<div class="form-group">
 				<label for="modalCSVUploadFieldDelimiter" class="control-label">Optional - Field delimiter:</label>
 				<input id="modalCSVUploadFieldDelimiter" type="text" class="form-control field-delimiter-input">
 				<small>Leave empty to autodetect. Single character, enter \t for tab</small>
 			</div>
-			<div class="form-group modalCSVUploadFileInfo">
-				<label class="control-label">File info:</label>
-				<div></div>
-				<label class="control-label">Preview:</label>
-				<small></small>
+			<div class="form-group modalCSVUploadMode">
+				<label class="control-label">Upload mode:</label><br>
+				<label class="radio-inline">
+					<input type="radio" name="modalCSVUploadMode" value="insert" checked>Insert
+				</label>
+				<label class="radio-inline">
+					<input type="radio" name="modalCSVUploadMode" value="update">Update
+				</label>
+				<br><small>An id field is mandatory in Update mode and optional in Insert mode.</small>
 			</div>
 		</form>
 	  </div>
