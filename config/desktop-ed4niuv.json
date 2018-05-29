@@ -1,7 +1,7 @@
 {
     "version": "1.0.0",
 
-    "auth"  : true,
+    "auth"  : false,
 
 	"ip"    : "localhost",
 	"port"  : 3000, 
