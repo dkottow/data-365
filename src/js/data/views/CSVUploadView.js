@@ -68,6 +68,7 @@ Donkeylift.CSVUploadView = Backbone.View.extend({
             console.log(rows[0].substr(0, 80) + '\n' + rows[1].substr(0, 80));
         };
         reader.readAsText(file);
+        this.showResult(false);
 	},
    
     checkChangelog: function(changeId, interval) {
