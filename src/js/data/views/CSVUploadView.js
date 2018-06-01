@@ -73,7 +73,7 @@ Donkeylift.CSVUploadView = Backbone.View.extend({
                   file.name 
                 + ' (' + file.type + ')' 
                 + ' <br>' + sizeStr 
-                + ' ' + rows.length + ' rows'
+                + ' ' + rows.length + ' lines'
             );
             
             var previewStr = '<b>Failed</b>';

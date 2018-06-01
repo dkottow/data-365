@@ -590,10 +590,21 @@ Database.prototype.allResult = function(tableName, rows, countRows, sql, options
 	};
 
 
-	if (opts.format == 'csv') {
-		return Papa.unparse(rows, {
-			delimiter: opts.delimiter
-		});
+	if (opts.format == 'csv') { 
+		if (rows.length > 0) {
+			return Papa.unparse(rows, {
+				delimiter: opts.delimiter
+			});
+		} else {
+			var fieldNames = _.map(opts.fields, function(f) {
+				if (f.table  && f.table != tableName) {
+					return f.table + Table.TABLE_FIELD_SEPARATOR + f.field;
+				} else {
+					return f.field;
+				} 
+			});
+			return fieldNames.join(opts.delimiter);
+		}
 	} 
 	
 	var result = { 
