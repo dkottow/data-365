@@ -5,6 +5,7 @@ Donkeylift.MenuDataView = Backbone.View.extend({
 
 	events: {
 		'click #filter-show': 'evFilterShow',
+		'click #filter-clear': 'evFilterClear',
 		'click #selection-add': 'evSelectionAdd',
 		'click #selection-filter': 'evSelectionFilter',
 		'click #selection-chown': 'evSelectionChangeOwner',
@@ -59,6 +60,11 @@ Donkeylift.MenuDataView = Backbone.View.extend({
 		this.getShowFilterView().render();
 	},
 
+	evFilterClear: function() {
+		Donkeylift.app.unsetFilters();
+		Donkeylift.app.resetTable();	
+	},
+	
 	evSelectionAdd: function(ev) {
 		var rows = Donkeylift.app.tableView.getSelection();
 		Donkeylift.app.addSelection(rows);

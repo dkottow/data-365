@@ -59,7 +59,7 @@ Donkeylift.FilterRangeView = Backbone.View.extend({
 									this.model.get('field'));
 		}
 
-		Donkeylift.app.router.navigate("reload-table", {trigger: true});			
+		Donkeylift.app.router.navReloadTable();
 		//window.location.hash = "#reload-table";
 	},
 
@@ -67,7 +67,7 @@ Donkeylift.FilterRangeView = Backbone.View.extend({
 		Donkeylift.app.filters.clearFilter(this.model.get('table'), 
 								this.model.get('field'));
 
-		Donkeylift.app.router.navigate("reload-table", {trigger: true});			
+		Donkeylift.app.router.navReloadTable();
 		//window.location.hash = "#reload-table";
 		this.render();
 	},

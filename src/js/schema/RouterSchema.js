@@ -6,38 +6,16 @@
 	Donkeylift.RouterSchema = Backbone.Router.extend({
 
         routes: {
-			"table/:table": "routeGotoTable",
-			"schema/:schema/:table": "routeUrlTableSchema"
+			"?path=/:account/:schema": "routeNavigate"
         },
 
-		routeUrlTableSchema: function(schemaName, tableName) {
-			this.gotoTable(tableName, {
-				schema: schemaName
-			});
+		routeNavigate: function(account, schema) {
+			Donkeylift.app.setSchema('/' + account + '/' + schema);
 		},
 
-		routeGotoTable: function(tableName) {
-			//console.log("routeGotoTable " + tableName);
-			this.gotoTable(tableName);
+		navGotoTable: function(table) {
+			Donkeylift.app.setTable(table);	
 		},
-
-		gotoTable: function(tableName, options) {
-			options = options || {};
-
-			var setOthers = function() {
-				var table = Donkeylift.app.schema.get('tables').getByName(tableName); 
-				Donkeylift.app.setTable(table);
-			}
-
-			if (options.schema) {
-				Donkeylift.app.setSchema(options.schema, setOthers);
-
-			} else {
-				setOthers();
-			}
-
-
-		}
 
         
 	});

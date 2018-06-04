@@ -48,9 +48,8 @@ Donkeylift.TableListView = Backbone.View.extend({
 	},
 
 	evTableClick: function(ev) {
-		var route = 'goto-table/' + $(ev.target).attr('data-target');
-		Donkeylift.app.router.navigate(route, { trigger: true });
-		console.log('click ' + $(ev.target).attr('data-target'));
+		console.log('evTableClick ' + $(ev.target).attr('data-target'));
+		Donkeylift.app.router.navGotoTable($(ev.target).attr('data-target'));
 	},
 	
 	evSelectShowTableChange: function(ev) {

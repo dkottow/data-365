@@ -70,13 +70,12 @@ Donkeylift.FilterItemsView = Backbone.View.extend({
 			value: filterValues
 		});
 		
-		Donkeylift.app.router.navigate("reload-table", {trigger: true});			
-		//window.location.hash = "#reload-table";
+		Donkeylift.app.router.navReloadTable();			
 	},
 
 	clearFilter: function() {
 		Donkeylift.app.filters.clearFilter(this.model.get('table'), this.model.get('field'));
-		Donkeylift.app.router.navigate("reload-table", {trigger: true});			
+		Donkeylift.app.router.navReloadTable();
 	},
 
 	evFilterOptionClick: function(ev) {
@@ -132,7 +131,7 @@ Donkeylift.FilterItemsView = Backbone.View.extend({
 			op: Donkeylift.Filter.OPS.NOTEQUAL,
 			value: null
 		});
-		Donkeylift.app.router.navigate("reload-table", {trigger: true});			
+		Donkeylift.app.router.navReloadTable();
 
 		this.loadRender();
 	},
@@ -146,7 +145,7 @@ Donkeylift.FilterItemsView = Backbone.View.extend({
 			op: Donkeylift.Filter.OPS.EQUAL,
 			value: null
 		});
-		Donkeylift.app.router.navigate("reload-table", {trigger: true});			
+		Donkeylift.app.router.navReloadTable();
 
 		this.loadRender();
 	},

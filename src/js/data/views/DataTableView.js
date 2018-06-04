@@ -277,7 +277,7 @@ Donkeylift.DataTableView = Backbone.View.extend({
 
 		this.dataTable.on('page.dt', function() {
 			console.log("page.dt");
-			Donkeylift.app.router.navigate("reload-table", {trigger: false});			
+			Donkeylift.app.router.navReloadTable();			
 		});
 
 		this.dataTable.on('init.dt', function() {
@@ -321,7 +321,7 @@ Donkeylift.DataTableView = Backbone.View.extend({
 
 		this.$('th.sorting').click(function() {
 			console.log("order.dt");
-			Donkeylift.app.router.navigate("reload-table", {trigger: false});			
+			Donkeylift.app.router.navReloadTable();			
 		});
 
 		//using search.dt event won't work because its fired otherwise, too
@@ -362,9 +362,8 @@ Donkeylift.DataTableView = Backbone.View.extend({
 	},
 
 	evDataCellClick: function(ev) {
-		var route = 'goto-table/' + $(ev.target).attr('data-target');
-		Donkeylift.app.router.navigate(route, { trigger: true });
-		console.log('click ' + $(ev.target).attr('data-target'));
+		console.log('evDataCellClick ' + $(ev.target).attr('data-target'));
+		Donkeylift.app.router.navGotoTable($(ev.target).attr('data-target'));
 	},
 
 	columnDataFn: function(field) {
@@ -397,11 +396,10 @@ Donkeylift.DataTableView = Backbone.View.extend({
 		} else if (field.get('fk') == 1) {
 			//link to referenced table row.
 			anchorFn = function(ref) {
-				var href = '#table'
-					+ '/' + field.get('fk_table')
-					+ '/id=' + Donkeylift.Field.getIdFromRef(ref)
+				var target = field.get('fk_table')
+					+ '/id=' + Donkeylift.Field.getIdFromRef(ref);
 
-				return '<a href="' + href + '">' + ref + '</a>';
+				return '<a href="#" data-target="' + target + '" class="data-cell">' + ref + '</a>';
 			}
 		}
 

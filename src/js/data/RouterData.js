@@ -8,9 +8,6 @@
 
         routes: {
 			"?path=*path": "routeNavigate"
-			, "goto-table/:table(/:filter)": "routeGotoTable"
-			, "reset-filter": "routeResetFilter"
-			, "reload-table": "routeReloadTable"
         },
 
 		routeNavigate: function(path) {
@@ -32,10 +29,12 @@
 			});			
 		},
 
-		routeGotoTable: function(table, filter) {
-			console.log('routeGotoTable', table, filter)
-			if (filter) {
-				var kv = filter.split('=');
+		navGotoTable: function(tablePath) {
+			console.log('navGotoTable', tablePath);
+			var table;
+			if (tablePath.indexOf('/') > 0) {
+				table = tablePath.split('/')[0];
+				var kv = tablePath.split('/')[1].split('=');
 				var filterTable;
 				if (kv[0].indexOf('.') > 0) {
 					filterTable = kv[0].substr(0, kv[0].indexOf('.'));
@@ -48,16 +47,14 @@
 					op: Donkeylift.Filter.OPS.EQUAL,
 					value: kv[1]
 				});
+			} else {
+				table = tablePath;
 			}
+
 			Donkeylift.app.setTable(table);
 		},
 
-		routeResetFilter: function() {
-			Donkeylift.app.unsetFilters();
-			Donkeylift.app.resetTable();
-		},
-
-		routeReloadTable: function() {
+		navReloadTable: function() {
 			Donkeylift.app.table.reload();
 		},
 
@@ -88,16 +85,7 @@
 				me.isBlockedGotoUrl = false;
 			}, ms);
 		},
-/*
-		updateNavigation: function(fragment, options) {
-			console.log('update nav ' + fragment + ' ' + options); 
-			options = options || {};
-			if (options.block > 0) {
-				this.blockGotoUrl(options.block); //avoid inmediate reolad FF
-			}
-			this.navigate(fragment, {replace: options.replace});
-		},	
-*/
+
 		updateNavigation: function(query, options) {
 			console.log('update nav', query, options); 
 			options = options || {};
@@ -107,24 +95,6 @@
 			this.navigate(query, { replace: options.replace });
 		},	
 		
-		gotoTable: function(tableName, params, cbAfter) {
-
-			if (params) {
-				//set filters
-				var filters = _.map(params.$filter, function(f) {
-					return Donkeylift.Filter.Create(f);
-				});
-				if (_.contains(filters, null)) {
-					console.log('error parsing $filter param. no filters added');
-				} else {
-					Donkeylift.app.setFilters(filters);
-				}
-			}
-			
-			//load data			
-			Donkeylift.app.setTable(tableName);
-			if (cbAfter) cbAfter();
-		}        
 	});
 
 
