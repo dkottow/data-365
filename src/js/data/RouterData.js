@@ -7,47 +7,49 @@
 	Donkeylift.RouterData = Backbone.Router.extend({
 
         routes: {
-			"table/:table": "routeGotoTable"
-			, "table/:table/:filter": "routeGotoRows"
+			"?path=*path": "routeNavigate"
+			, "goto-table/:table(/:filter)": "routeGotoTable"
 			, "reset-filter": "routeResetFilter"
 			, "reload-table": "routeReloadTable"
-			, "path=:path(/*params)": "routeUrlTableData"
         },
 
-		routeUrlTableData: function(path, paramStr) {
-			console.log("routeUrlTableData " + path + " " + paramStr);
-			/* 
-			 * hack to block executing router handlers twice in a row in FF
-			 * isBlocked.. will be timeout reset after a short time (100ms). 
-			*/
-			if (this.isBlockedGotoUrl) return;
-			var table = path.match(Donkeylift.Table.PathRE)[1];
-			this.gotoTable(table, this.parseParams(paramStr));
+		routeNavigate: function(path) {
+			var params = this.parseParams('path=' + path);
+			Donkeylift.app.setSchema(params.path, function() {
+				if (params.path.match(Donkeylift.Table.PathRE)) {
+
+					var filters = _.map(params.$filter, function(f) {
+						return Donkeylift.Filter.Create(f);
+					});
+					if (_.contains(filters, null)) {
+						console.log('error parsing $filter param. no filters added');
+					} else {
+						Donkeylift.app.setFilters(filters);
+					}
+	
+					Donkeylift.app.setTable(params.path.match(Donkeylift.Table.PathRE)[1], params);
+				}
+			});			
 		},
 
-		routeGotoTable: function(tableName) {
-			//console.log("routeGotoTable " + tableName);
-			this.gotoTable(tableName);
-		},
-
-		routeGotoRows: function(tableName, filter) {
-			var kv = filter.split('=');
-			var filterTable;
-			if (kv[0].indexOf('.') > 0) {
-				filterTable = kv[0].substr(0, kv[0].indexOf('.'));
-			} else {
-				filterTable = tableName;
+		routeGotoTable: function(table, filter) {
+			console.log('routeGotoTable', table, filter)
+			if (filter) {
+				var kv = filter.split('=');
+				var filterTable;
+				if (kv[0].indexOf('.') > 0) {
+					filterTable = kv[0].substr(0, kv[0].indexOf('.'));
+				} else {
+					filterTable = table;
+				}
+				Donkeylift.app.filters.setFilter({
+					table: filterTable,
+					field: 'id',
+					op: Donkeylift.Filter.OPS.EQUAL,
+					value: kv[1]
+				});
 			}
-
-			console.log("routeGotoRow " + tableName + " " + filter);
-			Donkeylift.app.filters.setFilter({
-				table: filterTable,
-				field: 'id',
-				op: Donkeylift.Filter.OPS.EQUAL,
-				value: kv[1]
-			});
-			
-			this.gotoTable(tableName);
+			Donkeylift.app.setTable(table);
 		},
 
 		routeResetFilter: function() {
@@ -57,19 +59,6 @@
 
 		routeReloadTable: function() {
 			Donkeylift.app.table.reload();
-		},
-
-
-		gotoHash: function(hash, cbAfter) {
-
-			var path = Donkeylift.util.getParameterByName('path', hash);
-			if (path && path.match(Donkeylift.Table.PathRE)) {
-				var params = this.parseParams(hash);	
-				this.gotoTable(path.match(Donkeylift.Table.PathRE)[1], params, cbAfter);				
-
-			} else {
-				cbAfter();
-			}
 		},
 
 		parseParams: function(paramStr) {
@@ -83,6 +72,8 @@
 				if (k[0] == '$') {
 					var param = pegParser.parse(k + "=" + v);
 					params[param.name] = param.value;
+				} else {
+					params[k] = v;
 				}
 			});
 			//console.dir(params);
@@ -113,7 +104,7 @@
 			if (options.block > 0) {
 				this.blockGotoUrl(options.block); //avoid inmediate reolad FF
 			}
-			this.navigate(query, {replace: options.replace});
+			this.navigate(query, { replace: options.replace });
 		},	
 		
 		gotoTable: function(tableName, params, cbAfter) {
@@ -133,9 +124,7 @@
 			//load data			
 			Donkeylift.app.setTable(tableName);
 			if (cbAfter) cbAfter();
-		}
-
-        
+		}        
 	});
 
 

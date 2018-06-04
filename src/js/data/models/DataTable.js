@@ -135,7 +135,7 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 	ajaxGetRowsFn: function() {
 		var me = this;
 		return function(query, callback, settings) {
-			console.log('api call get rows');
+			console.log('DataTable.ajaxGetRows ', query);
 
 			var orderClauses = [];
 			for(var i = 0; i < query.order.length; ++i) {
@@ -187,21 +187,16 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 
 			}).then(function(result) {
 				var response = result.response;
-					//console.log('response from api');
 				//console.dir(response);
-/*
-				var fragment = 'data'
-							+ '/' + Donkeylift.app.schema.get('name')
-							+ '/' + me.get('name')
-							+ '/' + q;
-
-				//console.log(fragment);
-				Donkeylift.app.router.updateNavigation(fragment, {
-					block: 100,
-					replace: true
+				var qf = me.paramsToQS({
+					'$orderby': params.$orderby,
+					'$skip': params.$skip, 
+					'$top': params.$top
 				});
-*/
-				var fragment = 'path=' + me.get('url') + '&' + q;
+				var fragment = '?path=' + me.get('url') 
+					+ '&' + qf
+					+ '&' + filters.toParam();
+
 				Donkeylift.app.router.updateNavigation(fragment, {
 					block: 100,
 					replace: true

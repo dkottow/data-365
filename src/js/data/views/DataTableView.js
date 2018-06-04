@@ -5,6 +5,10 @@ Donkeylift.DataTableView = Backbone.View.extend({
 	id: 'grid-panel',
 	className: 'panel',
 
+	events: {
+		'click .data-cell': 'evDataCellClick',
+	},
+
 	initialize: function() {
 		console.log("DataTableView.init " + this.model);			
 		this.listenTo(Donkeylift.app.filters, 'update', this.renderStateFilterButtons);
@@ -53,16 +57,20 @@ Donkeylift.DataTableView = Backbone.View.extend({
 		dtOptions.displayStart = params.$skip || 0;
 		dtOptions.pageLength = params.$top || 10;
 
-		dtOptions.order = [[0, 'asc']];
+		dtOptions.order = [];
 		if (params.$orderby) {
-			var order = _.pairs(params.$orderby[0]) [0];
-			for(var i = 0; i < fields.length; ++i) {
-				if (fields[i].vname() == order[0]) {
-					dtOptions.order[0][0] = i;
-					dtOptions.order[0][1] = order[1];
-					break;
+			for(var i = 0; i < params.$orderby.length; ++i) {
+				var orderName = params.$orderby[i].field;
+				var orderDir = params.$orderby[i].order; 
+				for(var j = 0; j < fields.length; ++j) {
+					if (fields[j].vname() == orderName) {
+						dtOptions.order.push([j, orderDir]);
+					}
 				}
 			}
+		}
+		if (dtOptions.order.length == 0) {
+			dtOptions.order.push([0, 'asc']);
 		}
 
 		var totalWidth = _.reduce(fields, function(s, f) {
@@ -353,6 +361,12 @@ Donkeylift.DataTableView = Backbone.View.extend({
 		});
 	},
 
+	evDataCellClick: function(ev) {
+		var route = 'goto-table/' + $(ev.target).attr('data-target');
+		Donkeylift.app.router.navigate(route, { trigger: true });
+		console.log('click ' + $(ev.target).attr('data-target'));
+	},
+
 	columnDataFn: function(field) {
 
 		var me = this;
@@ -374,11 +388,10 @@ Donkeylift.DataTableView = Backbone.View.extend({
 			&& me.model.get('referenced').length > 0) {
 			//link to table rows referencing this id.
 			anchorFn = function(id) {
-				var href = '#table'
-					+ '/' + me.model.get('referenced')[0].table
+				var target = me.model.get('referenced')[0].table
 					+ '/' + me.model.get('name') + '.id=' + id;
 
-				return '<a href="' + href + '">' + id + '</a>';
+				return '<a href="#" data-target="' + target + '" class="data-cell">' + id + '</a>';
 			}
 
 		} else if (field.get('fk') == 1) {

@@ -19,14 +19,7 @@ AppData.prototype.constructor = AppData;
 AppData.prototype.start = function(cbAfter) {
 	console.log("AppData.start...");
 	AppBase.prototype.start.call(this, function() {
-		//only data app
-		if (window.location.hash.length > 0) {
-			console.log("navigate " + window.location.hash);
-			Donkeylift.app.router.gotoHash(window.location.hash, cbAfter);
-		} else {
-			if (cbAfter) cbAfter();
-		}
-	})
+	});
 }
 
 AppData.prototype.createTableView = function(table, params) {

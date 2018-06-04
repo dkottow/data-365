@@ -77,8 +77,6 @@ function AppBase(params) {
 		me.renderSchemaList();
 	}); 
 
-	Backbone.history.start();
-
   //overwrite Backbone.ajax with Donkeylift.ajax 
   //Backbone.ajax = Donkeylift.ajax;
 
@@ -89,22 +87,28 @@ function AppBase(params) {
 AppBase.prototype.start = function(cbAfter) {
   console.log("AppBase.start... '" + window.location.href + "'");
   var me = this;
-  var path = Donkeylift.util.getParameterByName('path');
 
-  //add path to links
-  if (path) {
+  var path = Donkeylift.util.getParameterByName('path');
+  if (path && path.match(Donkeylift.Schema.PathRE)) {
+    var q = '?path=' + path.match(Donkeylift.Schema.PathRE)[0];
     $('.nav-d365').each(function() {
-      $(this).attr('href', $(this).attr('href') + '?path=' + path);
-    });
-  }
-  
+      $(this).attr('href', $(this).attr('href') + q);
+    });    
+  }  
+
   me.getSchemas(function() {
+
+    Backbone.history.start({ pushState: true , root: window.location.pathname });
+/*
     if (path) {
       me.setSchema(path, cbAfter);
+    
     } else {
       if (cbAfter) cbAfter();
     }
-  });  
+*/    
+  }); 
+   
 }
 
 AppBase.prototype.masterRoot = function() {

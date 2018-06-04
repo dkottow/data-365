@@ -8,7 +8,7 @@ Donkeylift.TableListView = Backbone.View.extend({
 */
 
 	events: {
-		//'click .table-item': 'evTableClick'
+		'click .table-item': 'evTableClick',
 		'change #selectShowTables': 'evSelectShowTableChange'
 	},
 
@@ -28,11 +28,8 @@ Donkeylift.TableListView = Backbone.View.extend({
 		var tables = this.collection.getAll(); //sorted alphabetically
 		_.each(tables, function(table) {
 			if (table.visible()) {
-				var href = "#table" 
-						+ "/" + table.get('name');
 				this.$('#table-list-items').append(this.itemTemplate({
-					name: table.get('name'),
-					href: href
+					name: table.get('name')
 				}));
 			}	
 			$('#selectShowTables').append(
@@ -50,6 +47,12 @@ Donkeylift.TableListView = Backbone.View.extend({
 		return this;
 	},
 
+	evTableClick: function(ev) {
+		var route = 'goto-table/' + $(ev.target).attr('data-target');
+		Donkeylift.app.router.navigate(route, { trigger: true });
+		console.log('click ' + $(ev.target).attr('data-target'));
+	},
+	
 	evSelectShowTableChange: function(ev) {
 		var me = this;
 		$('#selectShowTables option').each(function() {
