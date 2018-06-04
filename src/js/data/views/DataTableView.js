@@ -277,7 +277,8 @@ Donkeylift.DataTableView = Backbone.View.extend({
 
 		this.dataTable.on('page.dt', function() {
 			console.log("page.dt");
-			Donkeylift.app.router.navReloadTable();			
+			Donkeylift.app.router.navigate(); //push browser history
+			//Donkeylift.app.router.navReloadTable();	
 		});
 
 		this.dataTable.on('init.dt', function() {
@@ -321,7 +322,8 @@ Donkeylift.DataTableView = Backbone.View.extend({
 
 		this.$('th.sorting').click(function() {
 			console.log("order.dt");
-			Donkeylift.app.router.navReloadTable();			
+			Donkeylift.app.router.navigate(); //push browser history
+			//Donkeylift.app.router.navReloadTable();			
 		});
 
 		//using search.dt event won't work because its fired otherwise, too
