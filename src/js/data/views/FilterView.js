@@ -85,6 +85,8 @@ Donkeylift.FilterView = Backbone.View.extend({
 			this.itemsView.loadRender();
 		} else if (/filterRange$/.test(ev.target.href)) {
 			this.rangeView.loadRender();
+		} else {
+			this.$el.dropdown('toggle');
 		}
 	}
 });
