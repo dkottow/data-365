@@ -16,6 +16,10 @@ AppData.prototype.constructor = AppData;
 
 /*** override AppBase methods ***/ 
 
+AppData.prototype.pageUrl = function() {
+	return '/data.html';
+}
+
 AppData.prototype.start = function(cbAfter) {
 	console.log("AppData.start...");
 	AppBase.prototype.start.call(this, function() {

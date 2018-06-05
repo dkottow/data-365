@@ -38,8 +38,7 @@ Donkeylift.SchemaListView = Backbone.View.extend({
 		_.each(accounts, function(schemas, account) {
 			$('#content').append(this.contentAccountTemplate({ name: account }));
 			_.each(schemas, function(schema) {
-				let url = window.location.href.substr(0, window.location.href.length-1);
-				var href = url + '?' 
+				var href = Donkeylift.app.pageUrl() + '?' 
 					+ 'path=' + schema.get('path');
 
 				var html = this.contentSchemaTemplate({ 
@@ -68,9 +67,12 @@ Donkeylift.SchemaListView = Backbone.View.extend({
 			}
 
 			_.each(schemas, function(schema) {
-				this.$el.append(this.template({ 
+				var href = Donkeylift.app.pageUrl() + '?' 
+					+ 'path=' + schema.get('path');
+
+					this.$el.append(this.template({ 
 					name: schema.get('name'), 
-					value : schema.get('path') 
+					href: href
 				}));
 				++schemaCount;	
 				console.log(schema.get('path'));
@@ -96,7 +98,8 @@ Donkeylift.SchemaListView = Backbone.View.extend({
 
 	evSchemaChange: function(ev) {
 		console.log('SchemaListView.evSchemaChange ' + $(ev.target).attr('data-target'));
-		Donkeylift.app.setSchema($(ev.target).attr('data-target'), { reload: true });
+		//Donkeylift.app.router.navigate("?path=" + $(ev.target).attr('data-target'), { trigger: true });					
+		//Donkeylift.app.setSchema($(ev.target).attr('data-target'), { reload: true });
 	},
 
 });

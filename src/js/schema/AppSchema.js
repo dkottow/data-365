@@ -12,6 +12,10 @@ function AppSchema(params) {
 AppSchema.prototype = Object.create(Donkeylift.AppBase.prototype);
 AppSchema.prototype.constructor=AppSchema; 
 
+AppSchema.prototype.pageUrl = function() {
+	return '/schema.html';
+}
+
 AppSchema.prototype.createTableView = function(table, params) {
 	return new Donkeylift.SchemaTableView({model: table});
 }
