@@ -473,7 +473,10 @@ Database.prototype.updateCSVRows = function(tableName, csvPath, options, cbResul
 Database.prototype._upsertCSVRows = function(action, tableName, csvPath, options, cbResult) {
 	log.debug({
 		action: action, tableName: tableName, 
-		csvPath: csvPath, options: options 
+		csvPath: csvPath, options: { 
+			parser: options.parser, 
+			path: options.path  
+		}
 	}, 'Database.upsertCSVRows()...');
 	var me = this;
 	var changeLog = {
