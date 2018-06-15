@@ -107,6 +107,7 @@ Donkeylift.Field = Backbone.Model.extend({
 		var result = null;
 		var resultError = true;
 
+		//empty string becomes null	
 		if ( ! val || val.length == 0) return result;
 
 		var t = this.typeName();
