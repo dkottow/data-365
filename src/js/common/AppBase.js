@@ -97,16 +97,7 @@ AppBase.prototype.start = function(cbAfter) {
   }  
 
   me.getSchemas(function() {
-
     Backbone.history.start({ pushState: true , root: window.location.pathname });
-/*
-    if (path) {
-      me.setSchema(path, cbAfter);
-    
-    } else {
-      if (cbAfter) cbAfter();
-    }
-*/    
   }); 
    
 }
@@ -227,6 +218,7 @@ AppBase.prototype.setSchema = function(path, opts, cbAfter) {
 		$('#toggle-sidebar').show();
 
 		me.navbarView.render();
+    me.menuView.render();
 	}
 
 	if (reload) {
@@ -298,7 +290,6 @@ AppBase.prototype.setTable = function(table, params) {
 
 	$('#content').html(this.tableView.el);
 	this.tableView.render();
-	
 	this.menuView.render();
 }
 

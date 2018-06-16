@@ -7,6 +7,7 @@ function AppSchema(params) {
 	this.menuView = new Donkeylift.MenuSchemaView();
 	this.router = new Donkeylift.RouterSchema();
 	this.editorDialogs = {};
+
 }
 
 AppSchema.prototype = Object.create(Donkeylift.AppBase.prototype);
