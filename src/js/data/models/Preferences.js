@@ -3,7 +3,10 @@
 Donkeylift.Preferences = Backbone.Model.extend({ 
 
 	initialize : function(attrs) {
-		console.log("Preferences.initialize " + attrs.table.get('name'));
+        console.log("Preferences.initialize " 
+            , attrs.schema.get('name')
+            , attrs.table.get('name')
+        );
     },
 
     getPref: function(name) {
@@ -12,6 +15,8 @@ Donkeylift.Preferences = Backbone.Model.extend({
                 return this.get('table').skipRowCounts();
             case 'resolve_refs':
                 return this.get('table').resolveRefs();
+            case 'localize_datetime':
+                return this.get('schema').localizeDatetime();
         }
     },
 
@@ -26,6 +31,9 @@ Donkeylift.Preferences = Backbone.Model.extend({
                         field.setProp(name, value);	
                     }
                 });
+                break;
+            case 'localize_datetime':
+                this.get('schema').setProp(name, value);
                 break;
             default:
                 console.log("unknown preference '" + name + "´");

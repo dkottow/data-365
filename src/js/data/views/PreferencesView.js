@@ -16,6 +16,7 @@ Donkeylift.PreferencesView = Backbone.View.extend({
 		console.log("PreferencesView.render ");
         $('#modalInputSkipRowCounts').prop('checked', this.model.getPref('skip_row_counts'));
         $('#modalInputShowRowAlias').prop('checked', this.model.getPref('resolve_refs'));
+        $('#modalInputLocalizeDatetime').prop('checked', this.model.getPref('localize_datetime'));
 		$('#modalEditPrefs').modal();
 		return this;
 	},
@@ -23,6 +24,7 @@ Donkeylift.PreferencesView = Backbone.View.extend({
 	evPreferencesApplyClick: function() {
         this.model.setPref('skip_row_counts', $('#modalInputSkipRowCounts').is(':checked'));
         this.model.setPref('resolve_refs', $('#modalInputShowRowAlias').is(':checked'));
+        this.model.setPref('localize_datetime', $('#modalInputLocalizeDatetime').is(':checked'));
 		this.model.apply();
 	},
 

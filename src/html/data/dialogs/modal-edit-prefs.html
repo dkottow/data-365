@@ -6,14 +6,30 @@
 		<h4 class="modal-title">User Preferences</h4>
 	  </div>
 	  <div class="modal-body">
-        <div class="checkbox">
-					<label><input type="checkbox" id="modalInputShowRowAlias" value=""> Show row alias instead of foreign key
-					</label>	
+
+			<ul class="nav nav-tabs">
+				<li role="presentation" class="active"><a href="#table-scope" data-toggle="tab">Table scope</a></li>
+				<li role="presentation"><a href="#schema-scope" data-toggle="tab">Database scope</a></li>
+			</ul>
+
+			<div class="tab-content">
+				<div role="tabpanel" class="panel tab-pane active" id="table-scope">
+					<div class="checkbox">
+						<label><input type="checkbox" id="modalInputShowRowAlias" value=""> Show row alias instead of foreign key
+						</label>	
+					</div>
+					<div class="checkbox">
+						<label><input type="checkbox" id="modalInputSkipRowCounts" value =""> Skip pagination count queries
+						</label>
+					</div>
 				</div>
-        <div class="checkbox">
-          <label><input type="checkbox" id="modalInputSkipRowCounts" value =""> Skip pagination count queries
-					</label>
-        </div>
+				<div role="tabpanel" class="panel tab-pane" id="schema-scope">
+					<div class="checkbox">
+						<label><input type="checkbox" id="modalInputLocalizeDatetime" value=""> Display time in local timezone						
+						</label>	
+					</div>
+				</div>
+			</div>
 	  </div>
 	  <div class="modal-footer">
 			<button id="modalEditPrefsSave" type="button" class="btn btn-default" data-dismiss="modal">Save</button>
