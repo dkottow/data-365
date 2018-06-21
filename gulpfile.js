@@ -36,13 +36,10 @@ var outputs = {
     DL_COMMON_CSS: 'dl_common.css', //donkeylift.css
     DL_3RDPARTY_CSS: 'dl_3rdparty.css', //3rdparty.css
 
-	DL_DATA_JS: 'dl_data.js', //dl_data.js
-    DL_SCHEMA_JS: 'dl_schema.js', //dl_schema.js
-    DL_3RDPARTY_JS: 'dl_3rdparty.js', //3rdparty.js
-
-	D365_DATA_JS: 'd365_data.js', 
-	D365_SCHEMA_JS: 'd365_schema.js', 
-	D365_API_JS: 'd365_api.js',
+	DL_API_JS: 'dl_api.js', //dl_api.js - minimum package to have login, ajax 
+	DL_DATA_JS: 'dl_data.js', //dl_data.js - Data Browser
+    DL_SCHEMA_JS: 'dl_schema.js', //dl_schema.js - Schema Editor
+    DL_3RDPARTY_JS: 'dl_3rdparty.js', //3rdparty.js - 3rdparty libraries, need by dl_data & dl_schema
 
     JS_DIR: './public/js/',
 	CONTENT_DIR: './public/',
@@ -58,6 +55,8 @@ var tasks = [
     'build-api-html',
     'build-index-html',
 
+	'build-dl-api-js',
+	
 	'build-dl-data-js',
     'build-dl-schema-js',
     'build-dl-3rdparty-js',
@@ -178,77 +177,22 @@ gulp.task('build-index-html', function () {
 		.pipe(gulp.dest(outputs.PAGES_DIR));
 });
 
-gulp.task('build-WebApi-aspx', function () {
 
-    return gulp.src([ inputs.SRC_DIR + 'aspx/WebApi.aspx' ])
-
-		.pipe(replace("$DATA365_SITEASSETS_DIR", process.env.DATA365_SITEASSETS_DIR))	
-		.pipe(replace("$DATA365_SERVER", process.env.DATA365_SERVER))	
-		
-		.pipe(gulp.dest(outputs.ASPX_DIR));
-});
-
-gulp.task('build-d365-data-js', function () {
-
-    return gulp.src([
-        inputs.SRC_DIR + "js/SharePoint/Config.js",
-		inputs.SRC_DIR + "js/SharePoint/App.js",
-        inputs.SRC_DIR + "js/SharePoint/Common.js",
-	])
-	.pipe(replace("$DATA365_SERVER", config.apiServer))
-	.pipe(replace("$DATA365_APPLICATION", "Donkeylift.AppData"))
-/*
-	.pipe(replace("$DATA365_ACCOUNT", process.env.DATA365_ACCOUNT))	
-	.pipe(replace("$DATA365_DATABASE", process.env.DATA365_DATABASE))	
-*/
-	
-	.pipe(concat(outputs.D365_DATA_JS))
-	.pipe(gulp.dest(outputs.JS_DIR));
-});
-
-gulp.task('build-d365-schema-js', function () {
-
-	return gulp.src([
-		inputs.SRC_DIR + "js/SharePoint/Config.js",
-		inputs.SRC_DIR + "js/SharePoint/App.js",
-		inputs.SRC_DIR + "js/SharePoint/Common.js",
-	])
-	.pipe(replace("$AZURE_TENANT", process.env.AZURE_TENANT))	
-	.pipe(replace("$AAD_APPLICATION_ID", process.env.AAD_APPLICATION_ID))	
-	.pipe(replace("$DATA365_SERVER", process.env.DATA365_SERVER))	
-	.pipe(replace("$DATA365_APPLICATION", "Donkeylift.AppSchema"))
-/*
-	.pipe(replace("$DATA365_ACCOUNT", process.env.DATA365_ACCOUNT))
-	.pipe(replace("$DATA365_DATABASE", process.env.DATA365_DATABASE))	
-*/
-	
-	.pipe(concat(outputs.D365_SCHEMA_JS))
-	.pipe(gulp.dest(outputs.JS_DIR));
-});
-
-	
-gulp.task('build-d365-api-js', function () {
-
-    return gulp.src([
-		
-        inputs.SRC_DIR + "js/SharePoint/Config.js",
-		inputs.SRC_DIR + "js/SharePoint/OpenApi.js",
-		inputs.SRC_DIR + "js/SharePoint/Common.js",
-		
-		inputs.SRC_3RDPARTY_DIR + 'jwt-decode/jwt-decode.min.js',
+gulp.task('build-dl-api-js', function () {
+	return gulp.src([ 
+		inputs.SRC_DIR + 'js/common/Donkeylift.js', 
 		inputs.SRC_3RDPARTY_DIR + 'adal-1.0.15/adal.min.js',
+		inputs.SRC_3RDPARTY_DIR + 'jwt-decode/jwt-decode.min.js'
 	])
-	.pipe(replace("$AZURE_TENANT", process.env.AZURE_TENANT))	
-	.pipe(replace("$AAD_APPLICATION_ID", process.env.AAD_APPLICATION_ID))	
-	.pipe(replace("$DATA365_SERVER", process.env.DATA365_SERVER))
-
-	.pipe(concat(outputs.D365_API_JS))
-	.pipe(gulp.dest(outputs.JS_DIR));
+		.pipe(concat(outputs.DL_API_JS))
+		.pipe(gulp.dest(outputs.JS_DIR));	
 });
-	
+		
+
 gulp.task('build-dl-data-js', function () {
 
     return gulp.src([
+        inputs.SRC_DIR + "js/common/Donkeylift.js",
         inputs.SRC_DIR + "js/common/AppBase.js",
 		inputs.SRC_DIR + "js/common/models/*.js",
 		inputs.SRC_DIR + "js/data/models/*.js",
@@ -268,9 +212,12 @@ gulp.task('build-dl-data-js', function () {
 
 });
 
+
+
 gulp.task('build-dl-schema-js', function () {
 
     return gulp.src([
+        inputs.SRC_DIR + "js/common/Donkeylift.js",
         inputs.SRC_DIR + "js/common/AppBase.js",
 		inputs.SRC_DIR + "js/common/models/*.js",
 		inputs.SRC_DIR + "js/schema/models/*.js",

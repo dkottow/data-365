@@ -55,7 +55,8 @@
 
 	<script type="text/javascript"> 
 			$(function() { 
-				Donkeylift.app = new Donkeylift.AppSchema({ server: '/api' }); 
+				Donkeylift.env.server = '/api';
+				Donkeylift.app = new Donkeylift.AppSchema(); 
 				Donkeylift.app.start(); 
 			});
 	</script>
