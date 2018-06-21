@@ -48,18 +48,79 @@ var Donkeylift = {
 		},
 
     //stackoverflow - https://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
-    //dk slightly modified to find "query parameter" in hash of url
     getParameterByName: function(name, url) {
       if (!url) url = window.location.href;
       name = name.replace(/[\[\]]/g, "\\$&");
-      var regex = new RegExp("[?&#]" + name + "(=([^&#]*)|&|#|$)"),
+      var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
           results = regex.exec(url);
       if (!results) return null;
       if (!results[2]) return '';
       return decodeURIComponent(results[2].replace(/\+/g, " "));
     }
+  },
+  
+  login: function(cbAfter) {
+
+    var authContext = new AuthenticationContext({
+        //instance: 'https://login.microsoftonline.com/',
+        tenant: '46b66e86-3482-4192-842f-3472ff5fe764', //Golder AAD tenant
+        clientId: 'fdbf5216-d507-430d-a333-b49698dc266a' //AAD clientID of Data365 service
+        //popUp: false
+    });
+
+    // Check For & Handle Redirect From AAD After Login
+    authContext.handleWindowCallback();
+        
+    if ( ! authContext.getCachedUser()) {
+        //fyi - this is the actual login redirect
+        authContext.config.redirectUri = window.location.href;        
+        authContext.login();
+        return;
+    }
+
+    var ajaxFn = Donkeylift.ajax; //hold this for a moment
+
+    Donkeylift.ajax = function(url, settings) {
+        console.log("Donkeylift.ajax AAD token...");
+        return new Promise(function(resolve, reject) {
+
+            authContext.acquireToken(authContext.config.clientId, function(error, token) {
+                if (error || !token) {
+                    windows.alert("Error acquiring AAD token. Please reload page.");
+                    console.log(error);
+                    reject(error);
+
+                } else {
+                    //add AAD token to ajax request header    
+                    settings = settings || {}; settings.headers = settings.headers || {};
+                    settings.headers['Authorization'] = 'Bearer ' + token;
+
+                    ajaxFn(url, settings).then(function(result) {
+                        console.log("ajaxFn.then ...AAD token Donkeylift.ajax");
+                        resolve(result);
+                    }).catch(function(result) {
+                        console.log("ajaxFn.catch ...AAD token Donkeylift.ajax");
+                        reject(result);                        
+                    });
+                }    
+            });
+        });    
+    }
+
+    authContext.acquireToken(authContext.config.clientId, function(error, token) {
+        console.log("authContext.acquireToken...");
+        if (error || !token) {
+            windows.alert("Error acquiring AAD token");
+            console.log(error);
+            return;
+        }
+
+        var attrs = jwt_decode(token);
+        cbAfter(null, attrs, token);        
+    });
   }
-	
+
+  
 };
 
 function AppBase(params) {
@@ -177,7 +238,7 @@ AppBase.prototype.unsetSchema = function() {
 	if (this.tableListView) this.tableListView.remove();
 	this.unsetTable();
 	$('#content').empty();
-  this.navbarView.render();
+  if (this.navbarView) this.navbarView.render();
 }
 
 AppBase.prototype.createSchema = function(path) {
@@ -209,15 +270,16 @@ AppBase.prototype.setSchema = function(path, opts, cbAfter) {
   var reload = opts.reload !== undefined ? opts.reload : loadRequired; 
 
 	var updateViewsFn = function() {
-		me.tableListView = new Donkeylift.TableListView({
-			model: me.schema,
-			collection: me.schema.get('tables')
-		});
-    $('#sidebar').append(me.tableListView.el);
-    me.tableListView.render();
-		$('#toggle-sidebar').show();
-
-		me.navbarView.render();
+    if ($('#sidebar').length) {
+      me.tableListView = new Donkeylift.TableListView({
+        model: me.schema,
+        collection: me.schema.get('tables')
+      });
+      $('#sidebar').append(me.tableListView.el);
+      me.tableListView.render();
+      $('#toggle-sidebar').show();
+    }
+    if (me.navbarView) me.navbarView.render();
     me.menuView.render();
 	}
 
@@ -226,7 +288,7 @@ AppBase.prototype.setSchema = function(path, opts, cbAfter) {
 		this.schema = this.createSchema(path); //impl in AppData / AppSchema
     this.schema.fetch(function(response) {
       console.log(response);
-      me.user.set('principal', response.login.principal);
+      me.user = new Donkeylift.User(response.login); //refresh
       updateViewsFn();
       if (cbAfter) cbAfter();
 		});
