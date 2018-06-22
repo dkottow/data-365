@@ -737,6 +737,7 @@ Controller.prototype.getObjs = function(req, res) {
 				, limit: params.values['$top'] 
 				, offset: params.values['$skip'] 
 				, debug: params.values['debug']	
+				, counts: params.values['counts']	
 			},
 	
 			function(err, result) { 
