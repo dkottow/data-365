@@ -2,7 +2,11 @@
 var Donkeylift = {
 
     env: {
-      server: 'https://data365.golder.com/api' // overwrite on page load if necessary
+      server: 'https://data365.golder.com/api', // overwrite on page load if necessary
+      aad: {
+        tenant: '46b66e86-3482-4192-842f-3472ff5fe764', //Golder AAD tenant
+        client: 'fdbf5216-d507-430d-a333-b49698dc266a' //AAD clientID of Data365 service
+      }
     },
   
     ajax: function(url, settings) {
@@ -16,9 +20,9 @@ var Donkeylift = {
           $('#ajax-progress-spinner').hide();
         });
   
-        jqXHR.success(function(response, textStatus, jqXHR) {
+        jqXHR.done(function(response, textStatus, jqXHR) {
           console.log(response);
-          console.log('jqXHR.success ...Donkeylift.ajax');
+          console.log('jqXHR.done ...Donkeylift.ajax');
           resolve({
             response: response,
             jqXHR: jqXHR, 
@@ -26,8 +30,8 @@ var Donkeylift = {
           })
         });
   
-        jqXHR.error(function(jqXHR, textStatus, errorThrown) {
-          console.log('jqXHR.error ...Donkeylift.ajax');
+        jqXHR.fail(function(jqXHR, textStatus, errorThrown) {
+          console.log('jqXHR.fail ...Donkeylift.ajax');
           reject({
             jqXHR: jqXHR, 
             textStatus: textStatus, 
@@ -61,8 +65,8 @@ var Donkeylift = {
   
       var authContext = new AuthenticationContext({
           //instance: 'https://login.microsoftonline.com/',
-          tenant: '46b66e86-3482-4192-842f-3472ff5fe764', //Golder AAD tenant
-          clientId: 'fdbf5216-d507-430d-a333-b49698dc266a' //AAD clientID of Data365 service
+          tenant: Donkeylift.env.aad.tenant,
+          clientId: Donkeylift.env.aad.client
           //popUp: false
       });
   
