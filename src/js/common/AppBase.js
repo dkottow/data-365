@@ -1,12 +1,10 @@
 /*global Backbone, $, _ */
 
 
-function AppBase(params) {
+function AppBase(opts) {
 	var me = this;
-
-  Donkeylift.env.server = params.server;
-
-  console.log('AppBase ctor', params);
+  opts = opts || {};
+  console.log('AppBase ctor', opts);
 	
 	$('#toggle-sidebar').click(function() {
 		me.toggleSidebar();
