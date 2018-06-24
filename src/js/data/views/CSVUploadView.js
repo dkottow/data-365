@@ -33,17 +33,15 @@ Donkeylift.CSVUploadView = Backbone.View.extend({
                 } else {
                     $('.modalCSVUploadResult small').html(row.ResultDetails);    
                 }
-                $('#modalCSVUploadSubmit').prop('disabled', false);
             } else {
                 $('.modalCSVUploadResult b').html('Processing...');                    
                 $('.modalCSVUploadResult small').html('');    
-                $('#modalCSVUploadSubmit').prop('disabled', true);
             }
             $('.modalCSVUploadResult').show();
         } else {
-            $('#modalCSVUploadSubmit').prop('disabled', false);
             $('.modalCSVUploadResult').hide();
         }
+        $('#modalCSVUploadSubmit').html('Close');
     },
 
     evCSVModeChanged: function() {
@@ -81,6 +79,8 @@ Donkeylift.CSVUploadView = Backbone.View.extend({
             if (rows && rows.length > 1) {
                 previewStr = '<b>' + rows[0].substr(0, 80) + '</b>'  
                 + '<br>' + rows[1].substr(0, 80)
+
+                $('#modalCSVUploadSubmit').html('Upload'); 
             }
             $('.modalCSVUploadFileInfo small').html(previewStr);
             console.log(file, rows.length);
@@ -104,6 +104,10 @@ Donkeylift.CSVUploadView = Backbone.View.extend({
     }, 
 
     evUploadCSVClick: function() {
+        if ($('#modalCSVUploadSubmit').html() == 'Close') {
+            this.$el.modal('hide');
+            return;
+        }
         var me = this;
 		var files = $('#modalCSVUploadFile').prop('files');
 		var options = {};
