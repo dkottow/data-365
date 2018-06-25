@@ -50,12 +50,12 @@ Donkeylift.CSVUploadView = Backbone.View.extend({
         switch(mode) {
         case 'upload':
             $('#modalCSVUploadSubmit').html('Upload');
-            $('#modalCSVUploadSubmit').addClass('btn-success');
+            $('#modalCSVUploadSubmit').addClass('btn-primary');
             $('#modalCSVUploadSubmit').removeClass('btn-default');
             break;
         case 'close':
             $('#modalCSVUploadSubmit').html('Close');
-            $('#modalCSVUploadSubmit').removeClass('btn-success');
+            $('#modalCSVUploadSubmit').removeClass('btn-primary');
             $('#modalCSVUploadSubmit').addClass('btn-default');
         }
     },
