@@ -57,6 +57,8 @@ Donkeylift.DataTableView = Backbone.View.extend({
 		dtOptions.displayStart = params.$skip || 0;
 		dtOptions.pageLength = params.$top || 10;
 
+		dtOptions.selectStyle = Donkeylift.app.getProp('row_select_style') || 'os'; // 'multi'
+
 		dtOptions.order = [];
 		if (params.$orderby) {
 			for(var i = 0; i < params.$orderby.length; ++i) {
@@ -207,7 +209,9 @@ Donkeylift.DataTableView = Backbone.View.extend({
 			displayStart: dtOptions.displayStart, 
 			pageLength: dtOptions.pageLength, 
 			order: dtOptions.order,
-			select: true,
+			select: {
+				style: dtOptions.selectStyle
+			},
 			colReorder: true,
 			//dom: "lfrtip",
 			buttons: [

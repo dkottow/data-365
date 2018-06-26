@@ -16,8 +16,9 @@ Donkeylift.Preferences = Backbone.Model.extend({
             case 'resolve_refs':
                 return this.get('table').resolveRefs();
             case 'localize_datetime':
-                return this.get('schema').localizeDatetime();
-        }
+            case 'row_select_style':
+                return this.get('schema').getProp(name);
+            }
     },
 
     setPref: function(name, value) {
@@ -33,6 +34,7 @@ Donkeylift.Preferences = Backbone.Model.extend({
                 });
                 break;
             case 'localize_datetime':
+            case 'row_select_style':
                 this.get('schema').setProp(name, value);
                 break;
             default:
