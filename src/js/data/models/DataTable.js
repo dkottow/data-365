@@ -12,16 +12,6 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 		Donkeylift.Table.prototype.initialize.apply(this, arguments);
 	},
 
-	createView: function(options) {
-		return new Donkeylift.DataTableView(options);
-	},
-
-	getEnabledFields: function() {
-		return new Donkeylift.Fields(this.get('fields').filter(function(field) {
-			return ! field.get('disabled');
-		}));
-	},
-
 	fullUrl: function(ext) {
 		ext = ext || ROWS_EXT;
 		return Donkeylift.env.server + this.get('url') + ext;
@@ -77,23 +67,6 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 		req.method = method;
 	},
 
-	getEditorFields: function() {
-		
-		var editFields = _.filter(this.getEnabledFields().sortByOrder(), function(field) {
-			return ! _.contains(Donkeylift.Table.NONEDITABLE_FIELDS, field.get('name'));
-		});
-		
-		if (Donkeylift.app.user.isAdmin()) {
-			return editFields;
-
-		} else {		
-			//only db-owner is allowed to change own_by fields.
-			return _.reject(editFields, function(field) {
-				return field.get('name') == 'own_by'; 
-			});
-		}
-	},
-
 	ajaxGetEditorFn: function() {
 		var me = this;
 		return function(U1, U2, req, success, error) {
@@ -125,11 +98,6 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 				console.log(result.textStatus + " " + result.errThrown);
 			});
 		}
-	},
-
-	paramsToQS: function(params) {
-		var q = _.map(params, function(v,k) { return k + "=" + v; }).join('&');
-		return q;
 	},
 
 	ajaxGetRowsFn: function() {
@@ -170,7 +138,7 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 				});
 			}			
 
-			var q = me.paramsToQS(params) + '&' + filters.toParam();
+			var q = Donkeylift.util.paramsToQS(params) + '&' + filters.toParam();
 
 			var url = me.fullUrl() + '?' + q;
 			console.log(url);
@@ -188,7 +156,7 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 			}).then(function(result) {
 				var response = result.response;
 				//console.dir(response);
-				var qf = me.paramsToQS({
+				var qf = Donkeylift.util.paramsToQS({
 					'$orderby': params.$orderby,
 					'$skip': params.$skip, 
 					'$top': params.$top
@@ -241,7 +209,7 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 
 		var params = { '$select' : fieldName };
 		var filters = Donkeylift.app.filters.apply(filter);
-		var q = me.paramsToQS(params) + '&' + Donkeylift.Filters.toParam(filters);
+		var q = Donkeylift.util.paramsToQS(params) + '&' + Donkeylift.Filters.toParam(filters);
 
 		var url = me.fullUrl(STATS_EXT) + '?' + q;
 
@@ -278,7 +246,7 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 		};
 
 		var filters = Donkeylift.app.filters.apply(filter, searchTerm);
-		var q = me.paramsToQS(params) + '&' + Donkeylift.Filters.toParam(filters);
+		var q = Donkeylift.util.paramsToQS(params) + '&' + Donkeylift.Filters.toParam(filters);
 
 		var url = this.fullUrl() + '?' + q;
 
@@ -399,7 +367,7 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 			replace: options.replace
 		};
 
-		var q = me.paramsToQS(params);
+		var q = Donkeylift.util.paramsToQS(params);
 		var url = this.fullUrl(CSV_EXT) + '?' + q;
 		console.log('uploading..', file);
 
@@ -428,3 +396,5 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 	},
 
 });
+
+

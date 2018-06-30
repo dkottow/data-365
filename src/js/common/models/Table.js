@@ -96,10 +96,6 @@ Donkeylift.Table = Backbone.Model.extend({
 			: this.get('name') + '.' + field.get('name');
 	},
 
-	createView: function(options) {
-		return new Donkeylift.TableView(options);
-	},
-
 	attrJSON: function() {
 		return _.clone(this.attributes);
 	},		

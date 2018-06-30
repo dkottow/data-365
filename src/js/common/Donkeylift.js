@@ -42,23 +42,28 @@ var Donkeylift = {
     },
   
       util: {
-          /*** implementation details at eof ***/
-          removeDiacritics: function(str) {
-            return str.replace(/[^\u0000-\u007e]/g, function(c) {
-              return diacriticsMap[c] || c;
-            });
-          },
-  
-      //stackoverflow - https://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
-      getParameterByName: function(name, url) {
-        if (!url) url = window.location.href;
-        name = name.replace(/[\[\]]/g, "\\$&");
-        var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
-            results = regex.exec(url);
-        if (!results) return null;
-        if (!results[2]) return '';
-        return decodeURIComponent(results[2].replace(/\+/g, " "));
-      }
+        /*** implementation details at eof ***/
+        removeDiacritics: function(str) {
+          return str.replace(/[^\u0000-\u007e]/g, function(c) {
+            return diacriticsMap[c] || c;
+          });
+        },
+        
+        paramsToQS: function(params) {
+          var q = _.map(params, function(v,k) { return k + "=" + v; }).join('&');
+          return q;
+        },
+          
+        //stackoverflow - https://stackoverflow.com/questions/901115/how-can-i-get-query-string-values-in-javascript
+        getParameterByName: function(name, url) {
+          if (!url) url = window.location.href;
+          name = name.replace(/[\[\]]/g, "\\$&");
+          var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+              results = regex.exec(url);
+          if (!results) return null;
+          if (!results[2]) return '';
+          return decodeURIComponent(results[2].replace(/\+/g, " "));
+        }
     },
     
     login: function(cbAfter) {

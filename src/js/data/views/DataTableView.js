@@ -10,7 +10,8 @@ Donkeylift.DataTableView = Backbone.View.extend({
 	},
 
 	initialize: function() {
-		console.log("DataTableView.init " + this.model);			
+		console.log("DataTableView.init ", this.model, this.attributes);
+		this.attributes = this.attributes || {};
 		this.listenTo(Donkeylift.app.filters, 'update', this.renderStateFilterButtons);
 	},
 
@@ -18,8 +19,12 @@ Donkeylift.DataTableView = Backbone.View.extend({
 	columnTemplate: _.template($('#grid-column-template').html()),
 	buttonWrapTextTemplate: _.template($('#grid-button-wrap-text-template').html()),
 
+	isReadOnly: function() {
+		return this.model instanceof Donkeylift.View;
+	},
+
 	renderStateFilterButtons: function() {
-		var fields = this.model.getEnabledFields().sortByOrder();
+		var fields = this.getColumnFields();
 		_.each(fields, function(field, idx) {
 			
 			var filter = Donkeylift.app.filters.getFilter(
@@ -101,10 +106,7 @@ Donkeylift.DataTableView = Backbone.View.extend({
 		var me = this;
 		var dtEditorOptions = {};
 
-		var editFields = this.model.getEditorFields();
-
-
-		dtEditorOptions.fields = _.map(editFields, function(field) {
+		dtEditorOptions.fields = _.map(this.getEditorFields(), function(field) {
 			var edField = {};
 
 			edField.name = field.vname(); 
@@ -153,13 +155,38 @@ Donkeylift.DataTableView = Backbone.View.extend({
 		return dtEditorOptions;
 	},
 
+	getColumnFields: function() {
+		var enabledFields = new Donkeylift.Fields(this.model.get('fields').filter(function(field) {
+			return ! field.get('disabled');
+		}));
+		return enabledFields.sortByOrder();
+	},
+
+	getEditorFields: function() {
+		
+		var editFields = _.filter(this.getColumnFields(), function(field) {
+			return ! _.contains(Donkeylift.Table.NONEDITABLE_FIELDS, field.get('name'));
+		});
+		
+		if (Donkeylift.app.user.isAdmin()) {
+			return editFields;
+
+		} else {		
+			//only db-owner is allowed to change own_by fields.
+			return _.reject(editFields, function(field) {
+				return field.get('name') == 'own_by'; 
+			});
+		}
+	},
+
+
 	render: function() {
 		var me = this;
 		
 		console.log('DataTableView.render ');			
 		this.$el.html(this.tableTemplate());
 
-		var fields = this.model.getEnabledFields().sortByOrder();
+		var fields = this.getColumnFields();
 		_.each(fields, function(field, idx) {
 			var align = idx < fields.length / 2 ? 
 				'dropdown-menu-left' : 'dropdown-menu-right';
@@ -186,19 +213,20 @@ Donkeylift.DataTableView = Backbone.View.extend({
 		var dtOptions = this.getOptions(this.attributes.params, fields);
 		var dtEditorOptions = this.getEditorOptions();
 		//console.log(dtEditorOptions);
-
-		this.dataEditor = new $.fn.dataTable.Editor({
-			table: '#grid',
-			idSrc: 'id',
-			fields: dtEditorOptions.fields,
-			display: 'bootstrap',
-			formOptions: {
-				main: { 
-					focus: -1 
-				}
-			},
-			ajax: this.model.ajaxGetEditorFn(),
-		});
+		if ( ! this.isReadOnly()) {
+			this.dataEditor = new $.fn.dataTable.Editor({
+				table: '#grid',
+				idSrc: 'id',
+				fields: dtEditorOptions.fields,
+				display: 'bootstrap',
+				formOptions: {
+					main: { 
+						focus: -1 
+					}
+				},
+				ajax: this.model.ajaxGetEditorFn(),
+			});
+		}
 
 		var dtSettings = {
 			serverSide: true,
@@ -341,17 +369,6 @@ Donkeylift.DataTableView = Backbone.View.extend({
 			Donkeylift.app.router.navigate("reload-table", {trigger: false});			
 		});
 */
-		this.dataEditor.on('preSubmit', function(ev, req, action) {
-			me.model.sanitizeEditorData(req);
-			if (req.error) {
-				me.dataEditor.error(req.error.field, req.error.message);
-			}
-		});
-
-		this.dataEditor.on('submitError', function(ev, xhr, err, thrown, data) {
-			me.dataEditor.error(xhr.responseText);
-		});
-
 		this.dataTable.on('column-reorder', function (e, settings, details) {
 			$(document).mouseup(function() {
 				var columnOrders = me.dataTable.colReorder.order();
@@ -365,6 +382,19 @@ Donkeylift.DataTableView = Backbone.View.extend({
 
 			});
 		});
+
+		if (this.dataEditor) {
+			this.dataEditor.on('preSubmit', function(ev, req, action) {
+				me.model.sanitizeEditorData(req);
+				if (req.error) {
+					me.dataEditor.error(req.error.field, req.error.message);
+				}
+			});
+
+			this.dataEditor.on('submitError', function(ev, xhr, err, thrown, data) {
+				me.dataEditor.error(xhr.responseText);
+			});
+		}		
 	},
 
 	evDataCellClick: function(ev) {
