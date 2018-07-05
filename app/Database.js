@@ -108,6 +108,10 @@ Database.prototype.table = function(name) {
 	return this.schema.table(name);
 }
 
+Database.prototype.view = function(name) { 
+	return this.schema.view(name);
+}
+
 Database.prototype.tables = function() { 
 	return this.schema.tables();
 };
@@ -428,14 +432,14 @@ Database.prototype.allSanitizeOptions = function(options) {
 Database.prototype.allSQL = function(tableName, options) {
 
 	var opts = this.allSanitizeOptions(options);
-	var table = this.table(tableName);
 
-	log.trace(opts.fields + " from " + table.name 
+	log.trace(opts.fields + " from " + tableName 
 			+ " filtered by " + util.inspect(opts.filter));
 
+	var table = this.table(tableName) || this.view(tableName);
 	var sql = this.sqlBuilder.selectSQL(
-				table, opts.fields, opts.filter, 
-				opts.order, opts.limit, opts.offset);
+		table, opts.fields, opts.filter, 
+		opts.order, opts.limit, opts.offset);
 
 	sql.counts = opts.counts;
 

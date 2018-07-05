@@ -22,9 +22,10 @@ var config = require('config');
 
 var TableGraph = require('./TableGraph.js').TableGraph;
 var SqlHelper = require('./SqlHelperFactory.js').SqlHelperFactory.create();
+var SchemaDefs = require('./SchemaDefs.js').SchemaDefs;
 var Table = require('./Table.js').Table;
 var Field = require('./Field.js').Field;
-var SchemaDefs = require('./SchemaDefs.js').SchemaDefs;
+var View = require('./View.js').View;
 
 var log = require('./log.js').log;
 
@@ -63,7 +64,12 @@ Schema.prototype.init = function(schemaData) {
 			}
 		}, this);
 
-		this.views = schemaData.views || [];
+		var views = schemaData.views || [];
+		views = _.map(views, function(tableDef) {
+			return new View(tableDef);
+		});
+
+		this.views = views;
 
 		log.trace('...Schema.init()');
 
@@ -138,6 +144,11 @@ Schema.prototype.removeTable = function(name) {
 	this.init(schemaData);	
 }
 
+Schema.prototype.view = function(name) { 
+	return _.find(this.views, function(view) {
+		return view.name == name;
+	});
+}
 
 /******* file ops *******/
 

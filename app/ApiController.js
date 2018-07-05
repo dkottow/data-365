@@ -222,7 +222,7 @@ Controller.prototype._initRoutes = function() {
 	});
 
 	this.router.get(/^\/(\w+)\/(\w+)\/(\w+).view$/, function(req, res) {
-		me.getViewRows(req, res);
+		me.getRows(req, res);
 	});
 	
 	this.router.put(/^\/(\w+)\/(\w+)\/(\w+).chown$/, function(req, res) {
@@ -824,59 +824,6 @@ Controller.prototype.getStats = function(req, res) {
 	});
 }
 
-Controller.prototype.getViewRows = function(req, res) {
-	log.info({req: req}, 'Controller.getViewRows()...');
-	var reqTime = funcs.startHRTime();
-
-	var me = this;
-	var data;
-
-	var viewName = req.params[2];
-	if ( ! viewName) {
-		me.sendError(req, res, new Error('Missing view parameter'), 404);
-		return;
-	}	
-	
-	this.getDataObjects(req, {account: true, db: true}).then((result) => {
-		data = result;
-		return me.access.authorize('getViewRows', req, data);
-
-	}).then((access) => {
-
-		var params = me.parseQueryParameters(req.query);
-		if (params.error) throw params.error;
-
-		data.db.allView(viewName, {
-				filter: params.values['$filter'] 
-				, fields: params.values['$select'] 
-				, order: params.values['$orderby'] 
-				, limit: params.values['$top'] 
-				, offset: params.values['$skip'] 
-				, debug: params.values['debug']	
-				, format: params.values['format']	
-				, delimiter: params.values['delimiter']	
-			},
-	
-			function(err, result) { 
-				if (err) {
-					me.sendError(req, res, err, 400);
-					return;
-				}
-	
-				result.login = me.getLoginInfo(req);
-
-				log.trace(result);
-				res.send(result); 
-				funcs.stopHRTime(reqTime);
-				log.info({req: req, time: reqTime.secs}, '...Controller.getViewRows().');
-			}
-		);
-	}).catch(err => {
-		me.sendError(req, res, err);
-		return;
-	});
-}
-
 //insert rows into table
 Controller.prototype.postRows = function(req, res) {
 	var me = this;
@@ -1200,7 +1147,7 @@ Controller.prototype.getDataObjects = function(req, objs) {
 			return Promise.resolve(result);
 		}
 
-		result.table = result.db.table(req.params[2]);
+		result.table = result.db.table(req.params[2]) || result.db.view(req.params[2]);
 		if ( ! result.table) {
 			var err = new Error("Table '" + req.params[2] + " not found");
 			err.code = 404;

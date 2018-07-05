@@ -23,63 +23,35 @@ var Field = FieldFactory.class();
 */
 var SqlHelper = require('./SqlHelperFactory.js').SqlHelperFactory.create();
 var SchemaDefs = require('./SchemaDefs.js').SchemaDefs;
+var Queryable = require('./Queryable.js').Queryable;
 var Field = require('./Field.js').Field;
 
 var log = require('./log.js').log;
 
 var Table = function(tableDef) {
-
 	var me = this;
-	me._fields = {};
 
-	init(tableDef);
+	var fieldNames = _.pluck(tableDef.fields, 'name');
+	var missFields = _.filter(Table.MANDATORY_FIELDS, function(mf) {
+		return ! _.contains(fieldNames, mf.name);
+	});
 
-	function init(tableDef) {
-		var errMsg = util.format("Table.init(%s) failed. "
-					, util.inspect(tableDef));
+	tableDef.fields = _.values(tableDef.fields).concat(missFields);
 
-		if ( ! tableDef.name) {
-			log.error({ tableDef: tableDef }, "Table.init() failed.");
-			throw new Error("Table.init() failed. "
-				+ 'Table name missing.');
+	Queryable.call(this, tableDef);
+	
+	_.each(Table.SYSTEM_PROPERTIES, function(p) {
+		if (tableDef.hasOwnProperty(p)) {
+			me[p] = tableDef[p];	
+		} else {
+			me[p] = Table.SYSTEM_PROPERTY_DEFAULTS[p];
 		}
-
-		if ( ! /^\w+$/.test(tableDef.name)) {
-			log.error({ tableDef: tableDef }, "Table.init() failed.");
-			throw new Error("Table.init() failed."
-					+ " Table names can only have word-type characters.");
-		}
-
-		var fields = _.values(tableDef.fields) || [];
-
-		var fieldNames = _.pluck(fields, 'name');
-		var missFields = _.filter(Table.MANDATORY_FIELDS, function(mf) {
-			return ! _.contains(fieldNames, mf.name);
-		});
-		
-		fields = fields.concat(missFields);
-		
-		_.each(fields, function(f) {
-			try {
-				me._fields[f.name] = Field.create(f);
-			} catch(err) {
-				log.warn({field: f, err: err}, 
-					"Field.create() failed. Ignoring field '" + f.name + "'");
-			}
-		});
-
-		me.name = tableDef.name;
-
-		_.each(Table.SYSTEM_PROPERTIES, function(p) {
-			if (tableDef.hasOwnProperty(p)) {
-				me[p] = tableDef[p];	
-			} else {
-				me[p] = Table.SYSTEM_PROPERTY_DEFAULTS[p];
-			}
-		});
-
-	}
+	});
 }
+
+
+Table.prototype = Object.create(Queryable.prototype);	
+Table.prototype.constructor = Table;
 
 Table.MANDATORY_FIELDS = [
 	{ name: 'id', type: 'integer' }
@@ -117,16 +89,6 @@ Table.SYSTEM_PROPERTY_DEFAULTS = {
 Table.prototype.setProp = function(name, value) {
 	this.props = this.props || {};
 	this.props[name] = value;
-}
-
-
-Table.prototype.fields = function() {
-	return this._fields; //returns object with key == field.name
-}
-
-Table.prototype.field = function(name) {
-	return this.fields()[name];
-	//if ( ! field) throw new Error(util.format('field %s not found.', name));
 }
 
 Table.prototype.addField = function(field) {
@@ -174,56 +136,13 @@ Table.prototype.enabledFields = function() {
 	return _.pluck(enabledFields, 'name');
 }
 
-
-/*
-Table.prototype.refFields = function() {
-
-	var refField = util.format('%s.%s'
-				, this.rowAliasView()
-				, Field.ROW_ALIAS);
-
-	var fkRefs = _.map(this.foreignKeys(), function(fk) {
-		return util.format('%s.%s'
-				, Table.rowAliasView(fk.fk_table)
-				, Field.ROW_ALIAS)
-	});
-	
-	var result = [refField].concat(fkRefs);
-
-	return result;
-}
-*/
-
-/*
-function tableAlias(name, idx) {
-	return name + '_' + idx;
-}
-
-Table.prototype.alias = function(idx) {
-	return tableAlias(this.name, idx);
-}
-*/
-
-Table.prototype.allFieldClauses = function() {
-	return _.map(this.viewFields(), function(vf) {
-		return { table: this.name, field: vf };
-	}, this);
-}
-
-
 Table.prototype.toJSON = function() {
 
-	var result = {
-		name: this.name 
-	};
+	var result = Queryable.prototype.toJSON.call(this);
 
 	_.each(Table.SYSTEM_PROPERTIES, function(p) {
 		result[p] = this[p];
 	}, this);
-
-	result.fields = _.mapObject(this.fields(), function(field) {
-		return field.toJSON();
-	});
 
 	//console.log(result);
 	return result;

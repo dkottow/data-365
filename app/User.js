@@ -80,7 +80,7 @@ User.prototype.isAdminCB = function(opts, cbResult) {
                 cbResult(err);
                 return;                
             }
-            me.master.allView(User.VIEWS.ACCESS_ADMIN, viewOpts, function(err, result) {
+            me.master.all(User.VIEWS.ACCESS_ADMIN, viewOpts, function(err, result) {
     			log.trace({result: result}, 'User.isAdmin() result');
                 if (err) {
                     cbResult(err);

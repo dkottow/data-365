@@ -19,9 +19,9 @@ var util = require('util');
 var config = require('config');
 
 var SqlHelper = require('./SqlHelperFactory.js').SqlHelperFactory.create();
-var Schema = require('./Schema.js').Schema;
 var Table = require('./Table.js').Table;
 var Field = require('./Field.js').Field;
+var View = require('./View.js').View;
 
 var log = require('./log.js').log;
 
@@ -48,7 +48,7 @@ SqlBuilder.prototype.selectSQL
 	s.orders = this.sanitizeFieldClauses(table, orderClauses);
 	s.offset = offset || 0;
 	s.limit = limit || config.sql.pageRows || 1000;
-	
+
 	var query = this.querySQL(table, s.fields, s.filters);
 
 	if (s.orders.length == 0) {
@@ -101,49 +101,6 @@ SqlBuilder.prototype.statsSQL = function(table, fieldClauses, filterClauses)
 	return result;
 }
 
-SqlBuilder.prototype.selectViewSQL 
-	= function(viewName, fieldClauses, filterClauses, orderClauses, limit, offset) 
-{
-	log.trace('SqlBuilder.selectViewSQL...');
-	log.trace({
-		view: viewName
-		, fieldClauses: fieldClauses
-		, filterClauses: filterClauses
-		, orderClauses: orderClauses
-		, limit: limit, offfset: offset
-	}, "SqlBuilder.selectViewSQL");
-	
-	var s = {};
-
-	s.fields = this.buildFieldClauses(viewName, fieldClauses);
-	s.filters = this.buildFieldClauses(viewName, filterClauses);
-	s.orders = this.buildFieldClauses(viewName, orderClauses);
-	s.offset = offset || 0;
-	s.limit = limit || config.sql.pageRows || 1000;
-	
-	var query = this.queryViewSQL(viewName, s.fields, s.filters);
-	//var query = { sql: 'SELECT * FROM ' + viewName, params: [] };
-
-	var selectSQL;
-
-	if (s.orders.length > 0) {
-		var orderSQL = this.orderSQL(null, s.orders);
-		selectSQL = 'SELECT * FROM (' + query.sql + ') AS T '
-					+ orderSQL
-					+ SqlHelper.OffsetLimitSQL(s.offset, s.limit);
-	} else {
-		selectSQL = 'SELECT TOP ' + s.limit + ' * FROM (' + query.sql + ') AS T';
-	}
-
-	var result = {
-		'query': selectSQL, 
-		'params': query.params,
-		'sanitized': s
-	}
-	log.debug({result: result}, "SqlBuilder.selectViewSQL");
-	return result;
-}
-
 // private methods...
 
 
@@ -175,8 +132,9 @@ SqlBuilder.prototype.buildFieldClauses = function(viewName, fieldClauses) {
 
 SqlBuilder.prototype.sanitizeFieldClauses = function(table, fieldClauses) {
 
-	fieldClauses = fieldClauses == Table.ALL_FIELDS 
-				? table.allFieldClauses() : fieldClauses;
+	if (fieldClauses == Table.ALL_FIELDS) {
+		fieldClauses = table.allFieldClauses();	
+	}
 
 	var result = _.map(fieldClauses, function(fc) {
 		var item = this.buildFieldClause(table.name, fc);
@@ -204,6 +162,16 @@ SqlBuilder.prototype.sanitizeFieldClauses = function(table, fieldClauses) {
 }
 
 SqlBuilder.prototype.querySQL = function(table, fields, filters) {
+	if (table instanceof Table) {
+		return this.queryTableSQL(table, fields, filters);
+	} else if (table instanceof View) { 
+		return this.queryViewSQL(table, fields, filters);	
+	} else {
+		throw new Error(util.format("unknown table type '%s'", table.className));
+	}
+}
+
+SqlBuilder.prototype.queryTableSQL = function(table, fields, filters) {
 
 	var fkGroups = this.groupForeignKeys(fields, filters);
 
@@ -224,17 +192,17 @@ SqlBuilder.prototype.querySQL = function(table, fields, filters) {
 	};
 }
 
-SqlBuilder.prototype.queryViewSQL = function(viewName, fields, filters) {
+SqlBuilder.prototype.queryViewSQL = function(view, fields, filters) {
 
-	var filterSQL = this.filterViewSQL(viewName, filters);
+	var filterSQL = this.filterViewSQL(view.name, filters);
 	var clauses = ['1=1'].concat(filterSQL.clauses);
 
 	var fieldSQL = _.map(fields, function(f) {
-		return (f.field == '*') ? f.field : SqlHelper.EncloseSQL(f.field);
+		return SqlHelper.EncloseSQL(f.field);
 	}).join(',');
 
 	var selectSQL = 'SELECT DISTINCT ' + fieldSQL 
-					+ ' FROM ' + viewName
+					+ ' FROM ' + view.name
 					+ ' WHERE ' + clauses.join(' AND ');
 
 	return {
