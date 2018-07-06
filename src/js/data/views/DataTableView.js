@@ -20,7 +20,7 @@ Donkeylift.DataTableView = Backbone.View.extend({
 	buttonWrapTextTemplate: _.template($('#grid-button-wrap-text-template').html()),
 
 	isReadOnly: function() {
-		return this.model instanceof Donkeylift.View;
+		return this.readOnly == true; //TODO view should return true
 	},
 
 	renderStateFilterButtons: function() {
