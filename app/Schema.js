@@ -89,7 +89,10 @@ Schema.prototype.get = function() {
 			result[p] = this[p];				
 		}, this);
 
-		result.views = this.views;
+		var views = _.map(this.views, function(view) {
+			return view.toJSON();
+		});
+		result.views = _.object(_.pluck(views, 'name'), views);
 
 		return result;
 		

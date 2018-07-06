@@ -14,6 +14,18 @@ Donkeylift.Database = Donkeylift.Schema.extend({
 			return new Donkeylift.DataTable(table);
 		});
 		response.tables = new Donkeylift.Tables(tables);
+
+		//add user defined views as well
+		var views = _.filter(response.views, function(view) {
+			return ! view.name.match(/^_d365/);
+		});
+		views = _.map(views, function(view) {
+			view.readOnly = true; //mark as read only
+			return new Donkeylift.DataTable(view);
+		});
+		response.views = new Donkeylift.Tables(views);
+
+
 		return response;
 	},
 

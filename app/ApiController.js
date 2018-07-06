@@ -387,6 +387,11 @@ Controller.prototype.getDatabase = function(req, res) {
 						+ '/' + data.db.name() + '/' + t.name;
 			});
 
+			_.each(result.views, function(v) {
+				v.url = '/' + data.account.name 
+						+ '/' + data.db.name() + '/' + v.name;
+			});
+
 			result.login = me.getLoginInfo(req);
 
 			log.trace(result);
