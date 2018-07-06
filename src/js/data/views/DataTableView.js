@@ -420,6 +420,7 @@ Donkeylift.DataTableView = Backbone.View.extend({
 
 		var anchorFn = undefined;
 		if (field.get('name') == 'id' 
+			&& me.model.get('referenced') 
 			&& me.model.get('referenced').length > 0) {
 			//link to table rows referencing this id.
 			anchorFn = function(id) {
