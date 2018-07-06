@@ -213,7 +213,8 @@ AppBase.prototype.createTableView = function(table, params) {
 
 AppBase.prototype.setTable = function(table, params) {
   if (_.isString(table)) {
-    table = this.schema.get('tables').getByName(table);
+    table = this.schema.get('tables').getByName(table)
+        || this.schema.get('views').getByName(table);
   }
   console.log('app.setTable ' + table.get('name'));
 

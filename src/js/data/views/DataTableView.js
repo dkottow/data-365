@@ -243,13 +243,18 @@ Donkeylift.DataTableView = Backbone.View.extend({
 			colReorder: true,
 			//dom: "lfrtip",
 			buttons: [
-				{ extend: 'colvis', text: 'Show Columns' },
+				{ extend: 'colvis', text: 'Show Columns' }
+			]
+			
+		};
+
+		if (! this.isReadOnly()) {
+			dtSettings.buttons = dtSettings.buttons.concat([
 				{ extend: 'create', editor: this.dataEditor },
 				{ extend: 'edit', editor: this.dataEditor },
 				{ extend: 'remove', editor: this.dataEditor }
-			]
-		};
-
+			]);
+		}
 
 		this.dataTable = this.$('#grid').DataTable(dtSettings);
 
