@@ -32,7 +32,7 @@ Donkeylift.SchemaGraphView = Backbone.View.extend({
 		//console.log(tree);
 		var edges = [];
 		_.each(tree.joins, function(join) {
-			var table = this.model.get('tables').getByName(join.v);
+			var table = this.model.getTable(join.v);
 			var fks = table.get('fields').filter(function(f) {
 				return f.get('fk_table') == join.w;
 			});

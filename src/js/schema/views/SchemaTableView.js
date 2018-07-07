@@ -35,30 +35,6 @@ Donkeylift.SchemaTableView = Backbone.View.extend({
 		return this;
 	},
 
-/*	
-	sortableFieldsTable: function() {
-		$('.sortable-table').sortable({
-		  containerSelector: 'table',
-		  itemPath: '> tbody',
-		  itemSelector: 'tr',
-		  placeholder: '<tr class="placeholder"/>',
-		  onDrop: function($item, _super, event) {
-		  	var fn = $item.find('td:eq(2)').text();
-			var field = Donkeylift.app.table.get('fields').getByName(fn);
-			var order = 0;
-			fn = $item.prev().find('td:eq(2)').text();
-			if (fn) {
-				var prevField = Donkeylift.app.table.get('fields').getByName(fn);
-				order = prevField.getProp('order') + 1;
-			}
-			field.setProp('order', order);
-			Donkeylift.app.table.sanitizeFieldOrdering();
-			Donkeylift.app.updateSchema();
-		  }
-		});
-	},
-*/
-
 	elFields: function() {
 		return this.$('#fields tbody');
 	},

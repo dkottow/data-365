@@ -41,7 +41,7 @@ Donkeylift.FieldView = Backbone.View.extend({
 
 	getFieldFromRow: function(tr) {
 		var name = tr.find('td:eq(2)').text();
-		return Donkeylift.app.table.get('fields').getByName(name);
+		return Donkeylift.app.table.getField(name);
 	},
 
 	swapFieldsOrder: function(f1, f2) {

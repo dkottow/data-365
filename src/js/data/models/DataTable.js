@@ -108,7 +108,7 @@ Donkeylift.DataTable = Donkeylift.Table.extend({
 			var orderClauses = [];
 			for(var i = 0; i < query.order.length; ++i) {
 				var orderCol = query.columns[query.order[i].column].data;
-				var orderField = me.get('fields').getByName(orderCol);
+				var orderField = me.getField(orderCol);
 				orderClauses.push(encodeURIComponent(
 						orderField.vname() + ' ' + query.order[i].dir));
 			}

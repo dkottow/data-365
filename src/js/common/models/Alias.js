@@ -14,8 +14,8 @@ Donkeylift.Alias = Backbone.Model.extend({
 
 Donkeylift.Alias.parse = function(tableName, fieldName) {
 	//console.log('Alias.parse ' + tableName + '.' + fieldName);
-	var table = Donkeylift.app.schema.get('tables').getByName(tableName);
-	var field = table.get('fields').getByName(fieldName);
+	var table = Donkeylift.app.schema.getTable(tableName);
+	var field = table.getField(fieldName);
 	return new Donkeylift.Alias({table: table, field: field});
 }
 

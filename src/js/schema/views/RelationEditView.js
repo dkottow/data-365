@@ -60,10 +60,10 @@ Donkeylift.RelationEditView = Backbone.View.extend({
 			newField.set('type', Donkeylift.Field.TYPES.integer);
 			this.model.get('table').get('fields').setByName(newField);
 		} else {
-			newField = this.model.get('table').get('fields').getByName(newField);
+			newField = this.model.get('table').getField(newField);
 		}
 
-		newTable = this.schema.get('tables').getByName(newTable);
+		newTable = this.schema.getTable(newTable);
 		var newType = $('#modalInputRelationType').val();
 
 		this.model.set({

@@ -49,6 +49,10 @@ Donkeylift.Schema = Backbone.Model.extend({
 	},
 */
 
+	getTable: function(name) {
+		return this.get('tables').getByName(name);
+	},
+
 	getProp: function(name) {
 		return Donkeylift.app.getProp(name);
 	},
@@ -242,8 +246,8 @@ return;
 
 	getFieldFromQN: function(fieldQName) {
 		var parts = fieldQName.split('.');
-		var table = this.get('tables').getByName(parts[0]);
-		var field = table.get('fields').getByName(parts[1]);
+		var table = this.getTable(parts[0]);
+		var field = table.getField(parts[1]);
 		return { table: table, field: field };
 	},
 

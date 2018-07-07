@@ -126,8 +126,7 @@ Donkeylift.DataTableView = Backbone.View.extend({
 
 			} else if (field.get('fk') == 1) {
 				var sourceFn = function(q, syncCb, asyncCb) {
-					var fkTable = Donkeylift.app.schema
-						.get('tables').getByName(field.get('fk_table'));
+					var fkTable = Donkeylift.app.schema.getTable(field.get('fk_table'));
 					
 					fkTable.fieldValues('ref', q, function(rows, info) {
 						var options = _.map(rows, function(row) {
@@ -282,7 +281,7 @@ Donkeylift.DataTableView = Backbone.View.extend({
 
 		var filter = new Donkeylift.Filter({
 			table: this.model,
-			field: this.model.get('fields').getByName(colName)
+			field: this.model.getField(colName)
 		}); //TODO - avoid using ctor directly
 
 		var th = this.$('#col-' + colName);
@@ -348,7 +347,7 @@ Donkeylift.DataTableView = Backbone.View.extend({
 			me.addButtonEllipsisEvent();
 			if ($(buttonApi.node()).hasClass('buttons-columnVisibility')) {
 				//set visibility prop of field according to Datatable colvis button	
-				var field = me.model.get('fields').getByName(buttonApi.text());
+				var field = me.model.getField(buttonApi.text());
 				var visible = $(buttonApi.node()).hasClass('active');
 				//TODO props vs prefs 
 				field.setProp('visible', visible);
@@ -381,7 +380,7 @@ Donkeylift.DataTableView = Backbone.View.extend({
 				_.each(columnOrders, function(pos, idx) {
 					var field = settings.aoColumns[pos].data;
 					//TODO props vs prefs 
-					me.model.get('fields').getByName(field).setProp('order', pos);
+					me.model.getField(field).setProp('order', pos);
 					//console.log('col idx ' + idx + ' ' + field + ' order ' + pos) 
 				});
 

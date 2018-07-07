@@ -128,7 +128,7 @@ Donkeylift.Filter.Create = function(attrs) {
 	if (_.isObject(attrs.table)) {
 		opts.table = attrs.table; //trust it
 	} else if (_.isString(attrs.table)) {
-		opts.table = Donkeylift.app.schema.get('tables').getByName(attrs.table);
+		opts.table = Donkeylift.app.schema.getTable(attrs.table);
 	}
 
 	if (_.contains(_.values(Donkeylift.Filter.OPS), attrs.op)) {
@@ -138,7 +138,7 @@ Donkeylift.Filter.Create = function(attrs) {
 	if (_.isObject(attrs.field)) {
 		opts.field = attrs.field; //trust it
 	} else if (_.isString(attrs.field)) {
-		opts.field = opts.table.get('fields').getByName(attrs.field);
+		opts.field = opts.table.getField(attrs.field);
 	} else if (attrs.op == Donkeylift.Filter.OPS.SEARCH) {
 		opts.field = null;
 	}

@@ -25,7 +25,7 @@ Donkeylift.Table = Backbone.Model.extend({
 			var fk_table = _.find(tables, function(t) { 
 				return t.get('name') == ref.fk_table;
 			});
-			var fk = this.get('fields').getByName(ref.fk);
+			var fk = this.getField(ref.fk);
 
 			return new Donkeylift.Relation({
 				table: this,
@@ -67,7 +67,11 @@ Donkeylift.Table = Backbone.Model.extend({
 		}, this);
 		this.set('row_alias', row_alias, {silent: true});
 	},
-	
+
+	getField: function(name) {
+		return this.get('fields').getByName(name);
+	},
+
 	getProp: function(name) {
 		if ( ! this.propKey) return undefined;
 		return Donkeylift.app.getProp(this.propKey(name));
@@ -132,7 +136,7 @@ Donkeylift.Table = Backbone.Model.extend({
 		var resolveRefs = opts.resolveRefs || false;
 
 		return _.object(_.map(row, function(val, fn) {
-			var field = this.get('fields').getByName(fn);			
+			var field = this.getField(fn);			
 			if (resolveRefs) fn = field.get('name');
 			return [fn, field.parse(val, opts)];
 		}, this));
