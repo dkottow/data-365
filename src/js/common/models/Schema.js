@@ -93,7 +93,7 @@ Donkeylift.Schema = Backbone.Model.extend({
 		me.bbFetch({
 			success: function(response) {
 				me.orgJSON = JSON.parse(JSON.stringify(me.toJSON())); //copy
-				me.get('props').setKeyFuncs();
+				me.setPropertyAccessors();
 				console.log("Schema.fetch OK");
 				me.get('props').fetch(function() {
 					cbAfter(response);
@@ -128,7 +128,13 @@ Donkeylift.Schema = Backbone.Model.extend({
 			Donkeylift.app.showException(result, { url: url });
 		});
 
-	  },	
+	},	
+
+	setPropertyAccessors : function() {
+		this.get('tables').each(function(table) {
+			table.setPropertyAccessors();
+		});
+	},
 	
 	update : function(cbAfter) {
 		var me = this;

@@ -152,24 +152,6 @@ Donkeylift.Properties = Backbone.Collection.extend({
 		});		
 	},
 
-	setKeyFuncs : function() {
-		this.schema.get('tables').each(function(table) {
-			table.propKey = function(name) {
-				var key = [ table.get('name'), name ].join('.');
-				return key;		
-			}
-			table.get('fields').each(function(field) {
-				field.propKey = function(name) {
-					var key = [ 
-						table.get('name'), 
-						field.get('name'), 
-						name ].join('.');
-					return key;		
-				}
-			});
-		});		
-	},
-
 	getProp : function(key) {
 		var row = this.getRow(key);
 		return row ? row.get(Donkeylift.Properties.FIELDS.value) : undefined;

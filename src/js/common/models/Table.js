@@ -82,6 +82,23 @@ Donkeylift.Table = Backbone.Model.extend({
 		Donkeylift.app.setProp(this.propKey(name), value);
 	},
 
+	setPropertyAccessors : function() {
+		var me = this;
+		this.propKey = function(name) {
+			var key = [ me.get('name'), name ].join('.');
+			return key;		
+		}
+		this.get('fields').each(function(field) {
+			field.propKey = function(name) {
+				var key = [ 
+					me.get('name'), 
+					field.get('name'), 
+					name ].join('.');
+				return key;		
+			}
+		});
+	},
+
 	allProps : function() {
 		//TODO
 	},

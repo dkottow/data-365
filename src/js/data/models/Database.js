@@ -34,6 +34,13 @@ Donkeylift.Database = Donkeylift.Schema.extend({
 			|| this.get('views').getByName(name);
 	},
 
+	setPropertyAccessors : function() {
+		Donkeylift.Schema.prototype.setPropertyAccessors.call(this);
+		this.get('views').each(function(table) {
+			table.setPropertyAccessors();
+		});
+	},
+	
 	localizeDatetime: function() {
 		return this.getProp('localize_datetime');		
 	},
