@@ -48,6 +48,9 @@ Donkeylift.Schema = Backbone.Model.extend({
 		return totalRowCount == 0;
 	},
 */
+	getTables: function() {
+		return this.get('tables').sortBy(function(t) { return t.get('name'); });
+	},
 
 	getTable: function(name) {
 		return this.get('tables').getByName(name);

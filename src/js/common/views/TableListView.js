@@ -13,9 +13,9 @@ Donkeylift.TableListView = Backbone.View.extend({
 	},
 
 	initialize: function() {
-		console.log("TableListView.init " + this.collection);
-		this.listenTo(this.collection, 'update', this.render);
-		this.listenTo(this.collection, 'change', this.render);
+		console.log("TableListView.init " + this.model.get('name'));
+		this.listenTo(this.model.get('tables'), 'update', this.render);
+		this.listenTo(this.model.get('tables'), 'change', this.render);
 	},
 
 	template: _.template($('#table-list-template').html()),
@@ -25,7 +25,7 @@ Donkeylift.TableListView = Backbone.View.extend({
 		var me = this;
 		console.log('TableListView.render ');	
 		this.$el.html(this.template());
-		var tables = this.collection.getAll(); //sorted alphabetically
+		var tables = this.model.getTables(); //sorted alphabetically
 		_.each(tables, function(table) {
 			if (table.visible()) {
 				this.$('#table-list-items').append(this.itemTemplate({
@@ -55,7 +55,7 @@ Donkeylift.TableListView = Backbone.View.extend({
 	evSelectShowTableChange: function(ev) {
 		var me = this;
 		$('#selectShowTables option').each(function() {
-			var table = me.collection.getByName( $(this).val() );
+			var table = me.model.getTable( $(this).val() );
 			table.setProp('visible', $(this).prop('selected'));	
 		});
 	}

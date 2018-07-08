@@ -29,6 +29,14 @@ Donkeylift.Database = Donkeylift.Schema.extend({
 		return response;
 	},
 
+
+	getTables: function() {
+		var tables = this.get('tables').models.concat(this.get('views').models);
+		return _.sortBy(tables, function(t) {
+			return t.get('name');
+		});
+	},
+
 	getTable: function(name) {
 		return this.get('tables').getByName(name)
 			|| this.get('views').getByName(name);

@@ -148,8 +148,7 @@ AppBase.prototype.setSchema = function(path, opts, cbAfter) {
 	var updateViewsFn = function() {
     if ($('#sidebar').length) {
       me.tableListView = new Donkeylift.TableListView({
-        model: me.schema,
-        collection: me.schema.get('tables')
+        model: me.schema
       });
       $('#sidebar').append(me.tableListView.el);
       me.tableListView.render();
